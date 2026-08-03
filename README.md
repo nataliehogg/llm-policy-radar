@@ -110,7 +110,7 @@ firebase-config.js  your Firebase keys (public by design)
 css/style.css       all styling and colour tokens
 js/data.js          axes, archetype profiles, aggregation maths
 js/radar.js         SVG radar renderer
-js/ui.js            legend, tooltip, value readout, table, small multiples
+js/ui.js            legend, tooltip, value readout, small multiples
 js/store.js         Firebase read/write, with a local-only fallback
 js/app.js           participant page logic
 js/present.js       presenter view logic
@@ -135,8 +135,8 @@ paths are equivalent rather than the keyboard being an afterthought.
 ## Accessibility
 
 Series identity never rests on colour alone — the legend carries dash patterns
-and the small multiples are titled. The "Your ratings" panel lists every
-objective and its current value in text, so nothing on the participant page is
-only reachable by reading the chart. The presenter view keeps a table view for
-the same reason, since it has no such panel. The hover tooltip is reachable by
-keyboard, and the hit target is the whole sector rather than the line.
+and the small multiples are titled. Every axis on the participant radar is an
+ARIA slider carrying `aria-valuenow` and `aria-valuetext`, so a screen reader
+announces each objective and its current rating without the chart being read
+visually. The hover tooltip is reachable by keyboard, and the hit target is the
+whole sector rather than the line.

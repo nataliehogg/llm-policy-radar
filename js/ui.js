@@ -99,35 +99,6 @@ export function axisTooltipHtml(axisIndex, { agg, yours, activeArchetypes }) {
 }
 
 /**
- * Table twin of the chart — every plotted value is reachable without relying on
- * colour or hover.
- */
-export function renderTable(table, { agg, yours, archetypes }) {
-  const showGroup = Boolean(agg && agg.n);
-  const head = ['Objective', 'Theme'];
-  if (yours) head.push('You');
-  if (showGroup) head.push('Group mean', 'σ', 'Range');
-  for (const a of archetypes || []) head.push(a.label);
-
-  const thead = `<thead><tr>${head.map((h) => `<th scope="col">${h}</th>`).join('')}</tr></thead>`;
-
-  const body = AXES.map((axis) => {
-    const cells = [`<th scope="row">${axis.label}</th>`, `<td>${axis.section}</td>`];
-    if (yours) cells.push(`<td>${yours[axis.id]}</td>`);
-    if (showGroup) {
-      const s = agg.stats[axis.id];
-      cells.push(`<td>${fmt(s.mean, 2)}</td>`);
-      cells.push(`<td>${fmt(s.sd, 2)}</td>`);
-      cells.push(`<td>${s.n ? `${s.min}–${s.max}` : '—'}</td>`);
-    }
-    for (const a of archetypes || []) cells.push(`<td>${a.scores[axis.id]}</td>`);
-    return `<tr>${cells.join('')}</tr>`;
-  }).join('');
-
-  table.innerHTML = `${thead}<tbody>${body}</tbody>`;
-}
-
-/**
  * Four small radars, one per archetype, each with the live profile drawn over
  * that archetype's reference outline. This is how more than three reference
  * profiles get compared without putting four competing hues in one plot.
