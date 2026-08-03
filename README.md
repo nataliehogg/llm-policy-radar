@@ -56,9 +56,11 @@ respondent, one column per objective, with mean and standard deviation as
 trailing rows. Worth doing before clearing, since clearing is irreversible.
 
 The security rules block listing the `/sessions` root, so the app cannot
-enumerate past sessions. Codes presented from a browser are still recorded in
-its local storage, but there is no longer a UI listing them; the Firebase
-console's Data tab is the way to find an old code.
+enumerate past sessions from the database. Instead the presenter records each
+code it generates in that browser's local storage, and **Previous sessions** in
+the header opens a list of them — each entry links straight back to that
+session. If you lose a code and clear the browser's storage, the Firebase
+console's Data tab is the remaining way to find it.
 
 ## Design notes
 

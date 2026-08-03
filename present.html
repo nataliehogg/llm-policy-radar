@@ -26,6 +26,20 @@
         </div>
         <div class="head-actions">
           <button id="new-session" type="button">New code</button>
+          <div class="menu">
+            <button
+              id="prev-sessions"
+              type="button"
+              aria-expanded="false"
+              aria-controls="recent-panel"
+            >
+              Previous sessions
+            </button>
+            <div class="popover" id="recent-panel" hidden>
+              <p class="theme-title" style="margin: 0 0 0.35rem">Presented from this browser</p>
+              <ul class="recent-list" id="recent-sessions"></ul>
+            </div>
+          </div>
           <button id="export-csv" type="button">Download CSV</button>
           <button id="reset-session" type="button">Clear votes</button>
         </div>

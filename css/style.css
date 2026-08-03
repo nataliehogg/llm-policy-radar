@@ -715,6 +715,64 @@ body.present {
   border-radius: var(--radius);
 }
 
+/* --- Previous-sessions menu --------------------------------------------- */
+
+.menu {
+  position: relative;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 40;
+  min-width: 15rem;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 26px var(--shadow);
+  padding: 0.7rem 0.8rem;
+  text-align: left;
+}
+
+.recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.recent-list li + li {
+  border-top: 1px solid var(--border);
+}
+
+.recent-list a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.4rem 0.2rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  border-radius: 6px;
+}
+
+.recent-list a:hover {
+  background: var(--accent-soft);
+}
+
+.recent-code {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.recent-when {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 /* --- Small multiples ---------------------------------------------------- */
 
 /* Both pages show the four archetype panels as a single row beside the radar,

@@ -194,6 +194,72 @@ function exportCsv() {
   download(`radar-${state.code}-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv');
 }
 
+/* -------------------------------------------------------- previous sessions */
+
+/**
+ * The security rules deliberately block listing the /sessions root, so the only
+ * record of earlier codes is this browser's own. Each entry links straight to
+ * that session rather than switching in place, which keeps the URL honest.
+ */
+function renderRecentSessions() {
+  const ul = document.getElementById('recent-sessions');
+  if (!ul) return;
+  const list = store.recentSessions().filter((s) => s.code !== state.code);
+  ul.replaceChildren();
+
+  if (!list.length) {
+    const li = document.createElement('li');
+    li.className = 'muted small';
+    li.textContent = 'No earlier sessions from this browser.';
+    ul.appendChild(li);
+    return;
+  }
+
+  for (const { code, at } of list) {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = `present.html?session=${encodeURIComponent(code)}`;
+    // The space matters: without it a screen reader runs the code into the date.
+    a.innerHTML =
+      `<span class="recent-code">${code}</span> ` +
+      (at
+        ? `<span class="recent-when">${new Date(at).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+          })}</span>`
+        : '');
+    li.appendChild(a);
+    ul.appendChild(li);
+  }
+}
+
+function initRecentMenu() {
+  const btn = document.getElementById('prev-sessions');
+  const panel = document.getElementById('recent-panel');
+  if (!btn || !panel) return;
+
+  const close = () => {
+    panel.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+  };
+
+  btn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    const opening = panel.hidden;
+    if (opening) renderRecentSessions();
+    panel.hidden = !opening;
+    btn.setAttribute('aria-expanded', String(opening));
+  });
+
+  // Dismiss on an outside click or Escape, like any other menu.
+  document.addEventListener('click', (ev) => {
+    if (!panel.hidden && !panel.contains(ev.target)) close();
+  });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape') close();
+  });
+}
+
 /* ------------------------------------------------------------------- init */
 
 function init() {
@@ -221,6 +287,8 @@ function init() {
     draw();
     watch(code);
   });
+
+  initRecentMenu();
 
   document.getElementById('export-csv').addEventListener('click', exportCsv);
 
