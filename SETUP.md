@@ -3,8 +3,9 @@
 Two things to do: create a Firebase project (about five minutes, in a browser),
 then publish to GitHub Pages.
 
-Without step 1 the site still works — sliders, archetype comparison, your own
-radar — but votes cannot be shared between people.
+Without step 1 the site still works — rating the objectives on the radar and
+comparing yourself with the archetypes — but votes cannot be shared between
+people.
 
 ---
 
@@ -118,7 +119,7 @@ branch → main / (root)**.
 
 1. Open `present.html` — a code is generated automatically.
 2. Open `index.html?session=<that code>` in a second browser (or on your phone),
-   move some sliders, submit.
+   drag some points, submit.
 3. The presenter view should update within a second, without a refresh.
 
 ---
@@ -157,5 +158,5 @@ also lists codes you have previously presented from that browser.
 
 Tell people they can press **Leave session** when the meeting is over. It keeps
 their vote in the group average but detaches their browser, so playing with the
-sliders later cannot change the result. **Remove my response** is there for
+radar later cannot change the result. **Remove my response** is there for
 anyone who wants their vote taken out altogether.

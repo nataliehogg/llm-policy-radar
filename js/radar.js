@@ -62,11 +62,20 @@ export class Radar {
       ticks: true,
       labelChars: 14,
       onHover: null,
+      // onEdit(axisIndex, value) turns the radar into the input: drag a vertex,
+      // or focus an axis and use the arrow keys.
+      onEdit: null,
+      editScores: null,
       ...opts,
     };
     this.n = AXES.length;
     this.series = [];
+    this._dragAxis = null;
     this._buildFrame();
+  }
+
+  get editable() {
+    return typeof this.opts.onEdit === 'function';
   }
 
   get center() {
@@ -180,7 +189,81 @@ export class Radar {
     this._gSeries = gSeries;
     this._gHit = gHit;
 
-    if (this.opts.onHover) this._buildHitAreas();
+    if (this.opts.onHover || this.editable) this._buildHitAreas();
+    if (this.editable) this._bindDragging();
+  }
+
+  /** Convert a pointer event's client coordinates into SVG user units. */
+  _toUserSpace(ev) {
+    const ctm = this.svg.getScreenCTM();
+    if (!ctm) return null;
+    const pt = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(ctm.inverse());
+    return { x: pt.x, y: pt.y };
+  }
+
+  /** Which axis a point falls under, and how far out it sits. */
+  _locate(p) {
+    const dx = p.x - this.center;
+    const dy = p.y - this.center;
+    const radius = Math.hypot(dx, dy);
+    // Angles run from 12 o'clock clockwise, matching angleFor().
+    let a = Math.atan2(dy, dx) + Math.PI / 2;
+    while (a < 0) a += TAU;
+    const index = Math.round((a / TAU) * this.n) % this.n;
+    return { index, radius };
+  }
+
+  /** Radius back to a 1..5 rating, snapped to whole numbers. */
+  valueForRadius(radius) {
+    const t = (radius - this.innerRadius) / (this.maxRadius - this.innerRadius);
+    const raw = SCALE.min + t * (SCALE.max - SCALE.min);
+    return Math.min(SCALE.max, Math.max(SCALE.min, Math.round(raw)));
+  }
+
+  _bindDragging() {
+    this.svg.classList.add('is-editable');
+
+    const apply = (ev) => {
+      const p = this._toUserSpace(ev);
+      if (!p) return;
+      const value = this.valueForRadius(this._locate(p).radius);
+      this.opts.onEdit(this._dragAxis, value);
+    };
+
+    this.svg.addEventListener('pointerdown', (ev) => {
+      // Ignore presses out among the labels, so only the plot area edits.
+      const p = this._toUserSpace(ev);
+      if (!p) return;
+      const { index, radius } = this._locate(p);
+      if (radius > this.maxRadius * 1.12) return;
+
+      this._dragAxis = index;
+      try {
+        this.svg.setPointerCapture(ev.pointerId);
+      } catch {
+        // Capture is an optimisation, not a requirement — carry on without it.
+      }
+      this.svg.classList.add('is-dragging');
+      apply(ev);
+      ev.preventDefault();
+    });
+
+    this.svg.addEventListener('pointermove', (ev) => {
+      if (this._dragAxis === null) return;
+      apply(ev);
+      ev.preventDefault();
+    });
+
+    const end = (ev) => {
+      if (this._dragAxis === null) return;
+      this._dragAxis = null;
+      this.svg.classList.remove('is-dragging');
+      if (this.svg.hasPointerCapture?.(ev.pointerId)) {
+        this.svg.releasePointerCapture(ev.pointerId);
+      }
+    };
+    this.svg.addEventListener('pointerup', end);
+    this.svg.addEventListener('pointercancel', end);
   }
 
   /**
@@ -196,22 +279,74 @@ export class Radar {
       const [x2, y2] = [this.center + R * Math.cos(a + half), this.center + R * Math.sin(a + half)];
       const wedge = el('path', {
         d: `M ${this.center} ${this.center} L ${x1} ${y1} A ${R} ${R} 0 0 1 ${x2} ${y2} Z`,
-        class: 'radar-hit',
+        class: this.editable ? 'radar-hit radar-hit--editable' : 'radar-hit',
         'data-axis-index': i,
         tabindex: '0',
-        role: 'button',
+        // When the radar is the input, each axis is genuinely a slider — so
+        // screen readers announce the value and arrow keys are expected.
+        role: this.editable ? 'slider' : 'button',
         'aria-label': AXES[i].label,
+        'aria-valuemin': this.editable ? SCALE.min : null,
+        'aria-valuemax': this.editable ? SCALE.max : null,
       });
-      const enter = (ev) => this.opts.onHover(i, ev);
-      const leave = (ev) => this.opts.onHover(null, ev);
-      wedge.addEventListener('pointerenter', enter);
-      wedge.addEventListener('pointermove', enter);
-      wedge.addEventListener('pointerleave', leave);
-      // Keyboard focus surfaces exactly what hover does.
-      wedge.addEventListener('focus', enter);
-      wedge.addEventListener('blur', leave);
+
+      if (this.opts.onHover) {
+        const enter = (ev) => this.opts.onHover(i, ev);
+        const leave = (ev) => this.opts.onHover(null, ev);
+        wedge.addEventListener('pointerenter', enter);
+        wedge.addEventListener('pointermove', enter);
+        wedge.addEventListener('pointerleave', leave);
+        // Keyboard focus surfaces exactly what hover does.
+        wedge.addEventListener('focus', enter);
+        wedge.addEventListener('blur', leave);
+      }
+
+      if (this.editable) {
+        wedge.addEventListener('keydown', (ev) => this._onKey(ev, i));
+      }
+
       this._gHit.appendChild(wedge);
     }
+  }
+
+  _onKey(ev, axisIndex) {
+    const current = this.opts.editScores?.()?.[AXES[axisIndex].id];
+    if (!Number.isFinite(current)) return;
+    let next = current;
+    switch (ev.key) {
+      case 'ArrowUp':
+      case 'ArrowRight':
+        next = current + 1;
+        break;
+      case 'ArrowDown':
+      case 'ArrowLeft':
+        next = current - 1;
+        break;
+      case 'Home':
+        next = SCALE.min;
+        break;
+      case 'End':
+        next = SCALE.max;
+        break;
+      default:
+        // Digit keys jump straight to a rating.
+        if (/^[1-5]$/.test(ev.key)) next = Number(ev.key);
+        else return;
+    }
+    next = Math.min(SCALE.max, Math.max(SCALE.min, next));
+    ev.preventDefault();
+    if (next !== current) this.opts.onEdit(axisIndex, next);
+  }
+
+  /** Keep the ARIA values in step with what is drawn. */
+  syncAria(scores) {
+    if (!this.editable || !scores) return;
+    this._gHit.querySelectorAll('.radar-hit').forEach((wedge, i) => {
+      const v = scores[AXES[i].id];
+      if (!Number.isFinite(v)) return;
+      wedge.setAttribute('aria-valuenow', String(v));
+      wedge.setAttribute('aria-valuetext', `${v} out of ${SCALE.max} — ${AXES[i].label}`);
+    });
   }
 
   /**

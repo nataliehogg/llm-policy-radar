@@ -62,7 +62,8 @@
               </div>
               <ul class="legend" id="legend"></ul>
               <figcaption class="small muted" style="margin-top: 0.5rem">
-                Hover or focus a segment for the detail on that objective.
+                <strong>Drag the points</strong> in or out to set your ratings. Or press
+                <kbd>Tab</kbd> to an axis and use the arrow keys, or type 1–5.
               </figcaption>
             </figure>
 
@@ -79,20 +80,6 @@
               your scores over that archetype's reference profile.
             </p>
             <div class="multiples" id="multiples"></div>
-          </div>
-
-          <div class="card">
-            <h2>The numbers</h2>
-            <details>
-              <summary>Show table view</summary>
-              <div class="table-scroll">
-                <table id="table-view">
-                  <caption class="visually-hidden">
-                    Scores for each objective
-                  </caption>
-                </table>
-              </div>
-            </details>
           </div>
         </div>
 
@@ -127,7 +114,10 @@
 
           <div class="card">
             <h2>Your ratings</h2>
-            <div id="sliders"></div>
+            <p class="small muted" style="margin-top: 0">
+              Set these by dragging on the radar. What each objective means:
+            </p>
+            <div id="readout"></div>
             <div style="display: flex; gap: 0.5rem; margin-top: 0.9rem" class="no-print">
               <button id="reset-btn" type="button">Reset to 3</button>
               <button id="copy-btn" type="button">Copy scores</button>

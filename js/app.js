@@ -6,10 +6,9 @@ import { Radar } from './radar.js';
 import {
   initTheme,
   renderLegend,
-  renderSliders,
-  syncSliders,
+  renderReadout,
+  syncReadout,
   renderMultiples,
-  renderTable,
   Tooltip,
   axisTooltipHtml,
 } from './ui.js';
@@ -78,13 +77,10 @@ function legendEntries() {
 
 function draw() {
   radar.setSeries(seriesForMain());
+  radar.syncAria(state.scores);
+  syncReadout(state.scores);
   renderLegend(document.getElementById('legend'), legendEntries());
   renderMultiples(document.getElementById('multiples'), state.scores);
-  renderTable(document.getElementById('table-view'), {
-    agg: state.agg,
-    yours: state.scores,
-    archetypes: ARCHETYPES,
-  });
 }
 
 /* ---------------------------------------------------------------- session */
@@ -103,7 +99,7 @@ function updateSessionActions() {
 
 /**
  * Detach from the session without touching the submitted response: someone who
- * voted in the meeting stays in that meeting's average. Their sliders keep
+ * voted in the meeting stays in that meeting's average. Their radar keeps
  * working locally, and nothing they do afterwards reaches the group.
  */
 function leaveSession() {
@@ -203,7 +199,7 @@ async function submit() {
   try {
     await store.submitResponse(code, state.scores);
     if (state.session !== code) await joinSession(code);
-    setStatus('Submitted. Change a slider and submit again to update your answer.', true);
+    setStatus('Submitted. Move a point and submit again to update your answer.', true);
   } catch (err) {
     setStatus(`Could not submit: ${err.message}`);
   } finally {
@@ -218,6 +214,14 @@ function init() {
 
   radar = new Radar(document.getElementById('radar'), {
     size: 560,
+    editScores: () => state.scores,
+    onEdit: (axisIndex, value) => {
+      const axisId = AXES[axisIndex].id;
+      if (state.scores[axisId] === value) return;
+      state.scores[axisId] = value;
+      store.saveLocalScores(state.scores);
+      draw();
+    },
     onHover: (index, ev) => {
       radar.setActiveAxis(index);
       if (index === null) {
@@ -235,11 +239,9 @@ function init() {
     },
   });
 
-  renderSliders(document.getElementById('sliders'), state.scores, (axisId, value) => {
-    state.scores[axisId] = value;
-    store.saveLocalScores(state.scores);
-    draw();
-  });
+  renderReadout(document.getElementById('readout'), state.scores, (index) =>
+    radar.setActiveAxis(index)
+  );
 
   // Archetype toggles.
   const chips = document.getElementById('archetype-chips');
@@ -264,7 +266,6 @@ function init() {
   document.getElementById('reset-btn').addEventListener('click', () => {
     state.scores = defaultScores();
     store.saveLocalScores(state.scores);
-    syncSliders(state.scores);
     draw();
   });
 
@@ -303,7 +304,7 @@ function init() {
       if (ev.key === 'Enter') submit();
     });
     document.getElementById('session-extra').textContent =
-      'Anonymous. Nothing is sent until you press submit — moving the sliders on their own never ' +
+      'Anonymous. Nothing is sent until you press submit — dragging points on their own never ' +
       'changes the group average. Resubmitting replaces your previous answer.';
     if (initialCode) joinSession(initialCode);
     else setStatus('Not in a session yet.');

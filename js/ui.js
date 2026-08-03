@@ -1,6 +1,6 @@
 // Shared UI pieces used by both the participant page and the presenter view.
 
-import { AXES, ARCHETYPES, SCALE, similarityToArchetype } from './data.js';
+import { AXES, ARCHETYPES, similarityToArchetype } from './data.js';
 import { Radar } from './radar.js';
 
 /**
@@ -218,8 +218,12 @@ export function renderRanks(container, scores) {
   }
 }
 
-/** Grouped slider list, one group per theme, in the paper's section order. */
-export function renderSliders(container, scores, onChange) {
+/**
+ * Read-only value list, grouped by theme. The radar itself is the input now, so
+ * this exists to keep every number visible at a glance and to give the axis
+ * descriptions somewhere permanent to live.
+ */
+export function renderReadout(container, scores, onHighlight) {
   const order = ['productivity', 'development', 'integrity', 'governance'];
   const themeLabels = {
     productivity: 'Research Productivity (§3)',
@@ -229,6 +233,7 @@ export function renderSliders(container, scores, onChange) {
   };
 
   container.replaceChildren();
+
   for (const theme of order) {
     const group = document.createElement('div');
     group.className = 'theme-group';
@@ -242,31 +247,19 @@ export function renderSliders(container, scores, onChange) {
 
     for (const axis of AXES.filter((a) => a.theme === theme)) {
       const li = document.createElement('li');
-      li.className = 'axis-item';
-      const inputId = `slider-${axis.id}`;
+      li.className = 'axis-item readout-item';
+      li.dataset.axisId = axis.id;
       li.innerHTML = `
         <div class="axis-head">
-          <label class="axis-name" for="${inputId}">
-            ${axis.label} <span class="axis-section">${axis.section}</span>
-          </label>
+          <span class="axis-name">${axis.label} <span class="axis-section">${axis.section}</span></span>
           <span class="axis-value" id="val-${axis.id}">${scores[axis.id]}</span>
         </div>
         <p class="axis-blurb">${axis.blurb}</p>
       `;
-      const input = document.createElement('input');
-      input.type = 'range';
-      input.id = inputId;
-      input.min = String(SCALE.min);
-      input.max = String(SCALE.max);
-      input.step = '1';
-      input.value = String(scores[axis.id]);
-      input.setAttribute('aria-describedby', `val-${axis.id}`);
-      input.addEventListener('input', () => {
-        const v = Number(input.value);
-        li.querySelector(`#val-${axis.id}`).textContent = String(v);
-        onChange(axis.id, v);
-      });
-      li.appendChild(input);
+      if (onHighlight) {
+        li.addEventListener('pointerenter', () => onHighlight(AXES.indexOf(axis)));
+        li.addEventListener('pointerleave', () => onHighlight(null));
+      }
       list.appendChild(li);
     }
     group.appendChild(list);
@@ -274,12 +267,10 @@ export function renderSliders(container, scores, onChange) {
   }
 }
 
-/** Push new values into existing sliders without rebuilding the DOM. */
-export function syncSliders(scores) {
+/** Update just the numbers in the readout. */
+export function syncReadout(scores) {
   for (const axis of AXES) {
-    const input = document.getElementById(`slider-${axis.id}`);
     const val = document.getElementById(`val-${axis.id}`);
-    if (input) input.value = String(scores[axis.id]);
     if (val) val.textContent = String(scores[axis.id]);
   }
 }

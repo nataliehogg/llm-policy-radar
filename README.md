@@ -28,12 +28,12 @@ being counted twice. Nothing identifying is stored — just eleven numbers.
 Codes are a room number, not a secret. Anyone holding one can submit or clear
 the votes, which is the right trade for a group meeting.
 
-**Nothing is submitted implicitly.** Moving the sliders only ever changes your
+**Nothing is submitted implicitly.** Dragging points only ever changes your
 own radar; the group average changes when you press the button and at no other
 time.
 
 **Leaving.** *Leave session* detaches this browser — it forgets the code, drops
-it from the URL, and stops the live updates, so later fiddling with the sliders
+it from the URL, and stops the live updates, so later fiddling with the radar
 cannot reach the group. Your already-submitted response stays in the average,
 which is usually what you want: you did vote in the meeting. If you want out
 entirely, *Remove my response* deletes it and the average is recalculated
@@ -83,7 +83,7 @@ firebase-config.js  your Firebase keys (public by design)
 css/style.css       all styling and colour tokens
 js/data.js          axes, archetype profiles, aggregation maths
 js/radar.js         SVG radar renderer
-js/ui.js            legend, tooltip, sliders, table, small multiples
+js/ui.js            legend, tooltip, value readout, table, small multiples
 js/store.js         Firebase read/write, with a local-only fallback
 js/app.js           participant page logic
 js/present.js       presenter view logic
@@ -93,9 +93,23 @@ vendor/qrcode.js    QR generator (MIT, Kazuhiko Arase), vendored so the
 
 No build step, no dependencies to install. Plain ES modules.
 
+## Rating by direct manipulation
+
+The radar *is* the input — drag a point in or out and it snaps to the nearest
+whole rating. The whole sector is draggable, not just the dot, so it is
+forgiving to hit; presses out among the labels are ignored.
+
+Every axis is also a real ARIA slider: <kbd>Tab</kbd> to one and use the arrow
+keys, <kbd>Home</kbd>/<kbd>End</kbd> for the extremes, or type <kbd>1</kbd>–<kbd>5</kbd>
+to jump. Screen readers announce the current value, which is kept in step with
+what is drawn. Dragging alone would have shut out keyboard users, so the two
+paths are equivalent rather than the keyboard being an afterthought.
+
 ## Accessibility
 
-Every value on the radar is also in the table view. Series identity never rests
-on colour alone — the legend carries dash patterns, the small multiples are
-titled. The hover tooltip is reachable by keyboard, and the hit target is the
-whole sector rather than the line.
+Series identity never rests on colour alone — the legend carries dash patterns
+and the small multiples are titled. The "Your ratings" panel lists every
+objective and its current value in text, so nothing on the participant page is
+only reachable by reading the chart. The presenter view keeps a table view for
+the same reason, since it has no such panel. The hover tooltip is reachable by
+keyboard, and the hit target is the whole sector rather than the line.

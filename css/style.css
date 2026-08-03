@@ -312,6 +312,43 @@ input[type='text'] {
   cursor: crosshair;
 }
 
+/* --- Direct manipulation ------------------------------------------------ */
+
+.radar-hit--editable {
+  cursor: grab;
+}
+
+/* Suppress scroll/pinch on touch so a drag across the radar edits rather than
+   pans the page. */
+.radar-holder svg.is-editable {
+  touch-action: none;
+}
+
+.radar-holder svg.is-dragging,
+.radar-holder svg.is-dragging .radar-hit--editable {
+  cursor: grabbing;
+}
+
+/* The draggable vertices need to read as handles, so they are larger than a
+   plain data dot and pick up a ring on hover and focus. */
+.is-editable .s-you-dot {
+  r: 6;
+  transition: r 0.1s ease;
+}
+
+.is-editable:hover .s-you-dot,
+.is-editable.is-dragging .s-you-dot {
+  r: 7;
+}
+
+/* Keyboard focus outlines the whole sector, so it is obvious which axis the
+   arrow keys will move. */
+.radar-hit--editable:focus-visible {
+  outline: 2px solid var(--series-you);
+  outline-offset: -2px;
+  fill: var(--accent-soft);
+}
+
 /* Series. Thin marks, low-alpha fills — never thick saturated blocks. */
 
 .radar-line {
