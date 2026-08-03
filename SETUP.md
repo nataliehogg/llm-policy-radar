@@ -71,7 +71,19 @@ Codes are not secret; treat them like a room number, not a password.
 11. Register the app with any nickname. **Do not** tick Firebase Hosting — GitHub
     Pages is doing that job.
 12. Copy the `firebaseConfig` object it shows you.
-13. Paste the values into `firebase-config.js` in this repo.
+13. Paste **only the values** into `firebase-config.js`, keeping the existing
+    `export const firebaseConfig = { … }` wrapper.
+
+> **Ignore the rest of the console's snippet.** It shows
+> `npm install firebase` and
+> `import { initializeApp } from "firebase/app"`, which is advice for apps built
+> with a bundler. This site is plain ES modules with no build step: `js/store.js`
+> loads the SDK from Google's CDN and calls `initializeApp` itself. Running
+> `npm install firebase` here just drops ~180 MB of `node_modules` into the repo
+> for nothing — `.gitignore` now excludes it.
+>
+> The config file needs to *export* the object. A bare `const firebaseConfig`
+> will not import, and the site will silently fall back to local-only mode.
 
 `databaseURL` must be present. If it is missing from the snippet, go back to
 Realtime Database and copy the URL from the top of the Data tab — it looks like
@@ -83,29 +95,22 @@ Realtime Database and copy the URL from the top of the Data tab — it looks lik
 
 ---
 
-## 2. Publish to GitHub Pages
+## 2. GitHub Pages
 
-From this directory:
+Already done. The repo is
+[nataliehogg/llm-policy-radar](https://github.com/nataliehogg/llm-policy-radar)
+and Pages is serving `main` from the repository root:
 
-```bash
-git init
-git add .
-git commit -m "Language AI policy priorities radar"
-gh repo create radarsite --public --source=. --push
-```
+**<https://nataliehogg.github.io/llm-policy-radar/>**
 
-Then turn on Pages:
+Pushing to `main` redeploys it, usually within a minute:
 
 ```bash
-gh api -X POST repos/:owner/radarsite/pages \
-  -f 'source[branch]=main' -f 'source[path]=/'
+git add -A && git commit -m "..." && git push
 ```
 
-Or through the web UI: **Settings → Pages → Source: Deploy from a branch →
-main / (root)**.
-
-The site appears at `https://<your-username>.github.io/radarsite/` within a
-minute or two. Pushing to `main` redeploys it.
+If you ever need to re-enable Pages: **Settings → Pages → Source: Deploy from a
+branch → main / (root)**.
 
 ---
 
