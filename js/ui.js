@@ -1,6 +1,6 @@
 // Shared UI pieces used by both the participant page and the presenter view.
 
-import { AXES, ARCHETYPES, similarityToArchetype } from './data.js';
+import { AXES, ARCHETYPES, rankArchetypes, formatR } from './data.js';
 import { Radar } from './radar.js';
 
 /**
@@ -158,13 +158,12 @@ export function renderTable(table, { agg, yours, archetypes }) {
  */
 export function renderMultiples(container, scores, opts = {}) {
   const className = opts.className || 's-you';
-  const ranked = ARCHETYPES.map((a) => ({
-    archetype: a,
-    score: scores ? similarityToArchetype(scores, a) : null,
-  })).sort((x, y) => (y.score ?? 0) - (x.score ?? 0));
+  const ranked = scores
+    ? rankArchetypes(scores)
+    : ARCHETYPES.map((archetype) => ({ archetype, r: null }));
 
   container.replaceChildren();
-  for (const { archetype, score } of ranked) {
+  for (const { archetype, r } of ranked) {
     const fig = document.createElement('figure');
     fig.className = 'multiple';
     fig.style.margin = '0';
@@ -177,7 +176,7 @@ export function renderMultiples(container, scores, opts = {}) {
     const cap = document.createElement('figcaption');
     cap.innerHTML =
       `<h3>${archetype.label}</h3>` +
-      (score === null ? '' : `<span class="sub">${score}% match</span>`);
+      (r === null ? '' : `<span class="sub">r = ${formatR(r)}</span>`);
 
     fig.append(holder, cap);
     container.appendChild(fig);
@@ -199,20 +198,22 @@ export function renderMultiples(container, scores, opts = {}) {
 
 /** Bar list ranking the archetypes by similarity to the current profile. */
 export function renderRanks(container, scores) {
-  if (!scores) {
-    container.replaceChildren();
-    return;
-  }
-  const ranked = ARCHETYPES.map((a) => ({ a, score: similarityToArchetype(scores, a) })).sort(
-    (x, y) => y.score - x.score
-  );
   container.replaceChildren();
-  for (const { a, score } of ranked) {
+  if (!scores) return;
+
+  for (const { archetype, r } of rankArchetypes(scores)) {
     const li = document.createElement('li');
+    // The track spans r = -1 to +1 with zero at the midpoint, so the direction
+    // of the bar carries the sign and the number disambiguates it.
+    const half = r === null ? 0 : Math.abs(r) * 50;
+    const left = r === null ? 50 : r >= 0 ? 50 : 50 - half;
     li.innerHTML = `
-      <span class="rank-name">${a.label}</span>
-      <span class="rank-value">${score}%</span>
-      <span class="bar-track"><span class="bar-fill" style="width:${score}%"></span></span>
+      <span class="rank-name">${archetype.label}</span>
+      <span class="rank-value">${r === null ? '—' : `r = ${formatR(r)}`}</span>
+      <span class="bar-track bar-track--diverging">
+        <span class="bar-zero"></span>
+        <span class="bar-fill" style="left:${left}%; width:${half}%"></span>
+      </span>
     `;
     container.appendChild(li);
   }

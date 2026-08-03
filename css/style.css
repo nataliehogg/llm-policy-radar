@@ -775,6 +775,28 @@ body.present {
   border-radius: 3px;
 }
 
+/* Correlation runs -1 to +1, so the track is anchored at its midpoint and the
+   bar grows left or right from there. */
+.bar-track--diverging {
+  position: relative;
+  /* The zero tick deliberately overhangs the track. */
+  overflow: visible;
+}
+
+.bar-track--diverging .bar-fill {
+  position: absolute;
+  top: 0;
+}
+
+.bar-zero {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  width: 1px;
+  height: 9px;
+  background: var(--axis);
+}
+
 .rank-name {
   font-size: 0.88rem;
   font-weight: 600;

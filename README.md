@@ -74,6 +74,24 @@ there and every view updates.
 respondents. Where a group agrees it is thin; where it disagrees it is wide —
 and the disagreement is arguably the more interesting output of the exercise.
 
+**Archetype match is Pearson correlation**, computed across the eleven axes in
+`correlationToArchetype`. It compares the *shape* of a set of priorities, not
+their level: a group that shares an archetype's pattern but is uniformly
+stingier with the scale still correlates strongly, which is what the archetypes
+are about. `r = +1` is the same shape, `0` unrelated, `−1` exactly inverted.
+
+It replaced a normalised Euclidean distance shown as a percentage. That version
+was misleading in two ways: its denominator assumed being maximally wrong on all
+eleven axes at once, so scores were inflated and compressed into a narrow band —
+an exact match to one archetype still scored 33–49% against the others — and it
+conflated shape with level, so rating everything highly made a group look like
+whichever archetype had the largest values. For comparison, an exact High
+Leverage profile now scores `−0.60` against Trustworthiness rather than 35%.
+
+`r` is **undefined when a profile is flat**, including the default state where
+every axis sits at 3 — with no variation there is no shape to correlate. The UI
+shows `—` until at least two objectives differ.
+
 ## Structure
 
 ```

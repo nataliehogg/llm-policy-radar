@@ -232,19 +232,50 @@ export function defaultScores() {
 }
 
 /**
- * Similarity between a response and an archetype, as 0-100 so it reads naturally
- * in the UI. Based on Euclidean distance across the eleven axes.
+ * Pearson correlation between a profile and an archetype across the eleven axes.
+ *
+ * This deliberately measures the *shape* of a set of priorities rather than how
+ * high the ratings are: a group that shares an archetype's pattern but is
+ * uniformly stingier with the scale still correlates strongly, which is what the
+ * archetypes are actually about. The earlier Euclidean-distance score conflated
+ * the two, and its percentages were badly compressed — an exact match to one
+ * archetype still scored 33-49% against the others.
+ *
+ * Returns null when the correlation is undefined, which happens whenever either
+ * profile has zero variance — most importantly the default state where every
+ * axis sits at 3. With nothing varying there is no shape to compare.
  */
-export function similarityToArchetype(scores, archetype) {
-  let sumSq = 0;
-  for (const id of AXIS_IDS) {
-    const d = (scores[id] ?? 0) - archetype.scores[id];
-    sumSq += d * d;
+export function correlationToArchetype(scores, archetype) {
+  const xs = AXIS_IDS.map((id) => scores[id]);
+  const ys = AXIS_IDS.map((id) => archetype.scores[id]);
+  const n = xs.length;
+  const mx = xs.reduce((a, b) => a + b, 0) / n;
+  const my = ys.reduce((a, b) => a + b, 0) / n;
+
+  let sxy = 0;
+  let sxx = 0;
+  let syy = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = xs[i] - mx;
+    const dy = ys[i] - my;
+    sxy += dx * dy;
+    sxx += dx * dx;
+    syy += dy * dy;
   }
-  const dist = Math.sqrt(sumSq);
-  // Worst case: every axis off by the full scale range.
-  const maxDist = Math.sqrt(AXIS_IDS.length * (SCALE.max - SCALE.min) ** 2);
-  return Math.max(0, Math.round((1 - dist / maxDist) * 100));
+  if (sxx === 0 || syy === 0) return null;
+  return sxy / Math.sqrt(sxx * syy);
+}
+
+/** Archetypes ranked by correlation, strongest first; undefined ones last. */
+export function rankArchetypes(scores) {
+  return ARCHETYPES.map((archetype) => ({ archetype, r: correlationToArchetype(scores, archetype) }))
+    .sort((a, b) => (b.r ?? -Infinity) - (a.r ?? -Infinity));
+}
+
+/** Correlations are conventionally shown to two decimals, with an explicit sign. */
+export function formatR(r) {
+  if (r === null || r === undefined || Number.isNaN(r)) return '—';
+  return (r < 0 ? '−' : '+') + Math.abs(r).toFixed(2);
 }
 
 /**
