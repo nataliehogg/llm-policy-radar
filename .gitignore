@@ -1,0 +1,10 @@
+# This is a plain static site: no build step, no bundler, no dependencies.
+# The Firebase SDK is loaded from Google's CDN at runtime by js/store.js, so the
+# `npm install firebase` that the Firebase console suggests is not needed here —
+# that advice is for bundled apps.
+node_modules/
+package.json
+package-lock.json
+
+.DS_Store
+Thumbs.db

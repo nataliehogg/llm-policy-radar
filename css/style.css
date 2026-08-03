@@ -1,0 +1,782 @@
+/* ===========================================================================
+   Tokens
+   Colour roles resolve here and nowhere else, so light/dark swap in one place.
+   Archetypes are deliberately achromatic: they are reference context, and hue
+   is reserved for live data. (Four distinct archetype hues cannot clear the
+   all-pairs colour-blindness floors in dark mode, so identity is carried by
+   dash pattern and direct labels instead.)
+   =========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  --surface-1: #fcfcfb;
+  --page: #f9f9f7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --gridline: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --shadow: rgba(11, 11, 11, 0.06);
+
+  --series-you: #dc143c;
+  --series-mean: #0b0b0b;
+  --archetype: #6f6d67;
+  --accent-soft: rgba(220, 20, 60, 0.1);
+
+  --radius: 10px;
+  --font: 'EB Garamond', Garamond, Georgia, serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --gridline: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    --shadow: rgba(0, 0, 0, 0.5);
+    --series-you: #dc143c;
+    --series-mean: #ffffff;
+    --archetype: #a3a199;
+    --accent-soft: rgba(220, 20, 60, 0.18);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --surface-1: #1a1a19;
+  --page: #0d0d0d;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --gridline: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --series-you: #dc143c;
+  --series-mean: #ffffff;
+  --archetype: #a3a199;
+  --accent-soft: rgba(220, 20, 60, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--page);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  /* Garamond has a small x-height, so it needs a little more size than a UI
+     sans at the same nominal value. */
+  font-size: 1.075rem;
+  /* EB Garamond defaults to old-style figures, where 3, 4, 7 and 9 drop below
+     the baseline. Charming in prose, wrong for a page of ratings. */
+  font-variant-numeric: lining-nums;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+  margin: 0 0 0.4em;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: clamp(1.35rem, 3.2vw, 1.9rem);
+}
+h2 {
+  font-size: 1.05rem;
+}
+
+a {
+  color: var(--series-you);
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.lede {
+  color: var(--text-secondary);
+  max-width: 62ch;
+  margin: 0 0 1.25rem;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.small {
+  font-size: 0.8rem;
+}
+
+/* --- Header ------------------------------------------------------------- */
+
+.site-head {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-1);
+}
+
+.site-head .wrap {
+  padding-block: 1.25rem 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.site-head p {
+  margin: 0.15rem 0 0;
+}
+
+.head-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* --- Controls ----------------------------------------------------------- */
+
+button,
+.btn {
+  font: inherit;
+  font-size: 0.875rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 38px;
+}
+
+button:hover,
+.btn:hover {
+  border-color: var(--axis);
+}
+
+button:focus-visible,
+.btn:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--series-you);
+  outline-offset: 2px;
+}
+
+button.primary {
+  background: var(--series-you);
+  border-color: var(--series-you);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.primary:hover {
+  filter: brightness(1.06);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+input[type='text'] {
+  font: inherit;
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  min-height: 38px;
+}
+
+.code-input {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  width: 9rem;
+}
+
+/* --- Layout ------------------------------------------------------------- */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.1rem 1.15rem;
+}
+
+.card + .card {
+  margin-top: 1rem;
+}
+
+.card h2 {
+  margin-bottom: 0.35rem;
+}
+
+/* --- Radar -------------------------------------------------------------- */
+
+.radar-figure {
+  margin: 0;
+}
+
+.radar-holder {
+  position: relative;
+  width: 100%;
+}
+
+.radar-holder svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.radar-ring {
+  fill: none;
+  stroke: var(--gridline);
+  stroke-width: 1;
+}
+
+.radar-ring--outer {
+  stroke: var(--axis);
+}
+
+.radar-spoke {
+  stroke: var(--gridline);
+  stroke-width: 1;
+}
+
+.radar-spoke.is-active {
+  stroke: var(--axis);
+  stroke-width: 1.5;
+}
+
+.radar-tick {
+  fill: var(--text-muted);
+  font-size: 11.5px;
+  font-variant-numeric: lining-nums tabular-nums;
+  text-anchor: middle;
+  /* Halo keeps the number readable where a polygon crosses the axis. */
+  stroke: var(--surface-1);
+  stroke-width: 3;
+  paint-order: stroke fill;
+}
+
+.radar-label {
+  fill: var(--text-secondary);
+  font-size: 13px;
+  dominant-baseline: middle;
+}
+
+.radar-hit {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+/* Series. Thin marks, low-alpha fills — never thick saturated blocks. */
+
+.radar-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.radar-area {
+  stroke: none;
+}
+
+.radar-band {
+  stroke: none;
+}
+
+.radar-dot {
+  stroke: var(--surface-1);
+  stroke-width: 2;
+}
+
+.s-archetype-line {
+  stroke: var(--archetype);
+  stroke-width: 1.5;
+}
+.s-archetype-area {
+  fill: none;
+}
+
+.s-mean-line {
+  stroke: var(--series-mean);
+  stroke-width: 2.5;
+}
+.s-mean-area {
+  fill: var(--series-mean);
+  fill-opacity: 0.08;
+}
+.s-mean-band {
+  fill: var(--series-mean);
+  fill-opacity: 0.1;
+}
+.s-mean-dot {
+  fill: var(--series-mean);
+}
+
+.s-you-line {
+  stroke: var(--series-you);
+  stroke-width: 2;
+}
+.s-you-area {
+  fill: var(--series-you);
+  fill-opacity: 0.12;
+}
+.s-you-dot {
+  fill: var(--series-you);
+}
+
+/* --- Legend ------------------------------------------------------------- */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.legend svg {
+  flex: none;
+  overflow: visible;
+}
+
+/* --- Tooltip ------------------------------------------------------------ */
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 22px var(--shadow);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.82rem;
+  max-width: 19rem;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.tooltip.is-visible {
+  opacity: 1;
+}
+
+.tooltip h3 {
+  margin: 0 0 0.15rem;
+  font-size: 0.85rem;
+}
+
+.tooltip dl {
+  margin: 0.35rem 0 0;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.1rem 0.7rem;
+}
+
+.tooltip dt {
+  color: var(--text-secondary);
+}
+
+.tooltip dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Sliders ------------------------------------------------------------ */
+
+.axis-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.axis-item {
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.axis-item:first-child {
+  border-top: none;
+}
+
+.axis-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.axis-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.axis-section {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.axis-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--series-you);
+  font-size: 1rem;
+}
+
+.axis-blurb {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin: 0.15rem 0 0.4rem;
+}
+
+input[type='range'] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--series-you);
+  min-height: 30px;
+}
+
+.theme-group {
+  margin-top: 0.9rem;
+}
+
+.theme-group:first-of-type {
+  margin-top: 0;
+}
+
+.theme-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+/* --- Chips / toggles ---------------------------------------------------- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  min-height: 32px;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--accent-soft);
+  border-color: var(--series-you);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* --- Stats -------------------------------------------------------------- */
+
+.stat-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.5rem;
+}
+
+.stat {
+  min-width: 5rem;
+}
+
+.stat .value {
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 1.1;
+  display: block;
+}
+
+.stat .label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* --- Table view --------------------------------------------------------- */
+
+.table-scroll {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.82rem;
+}
+
+th,
+td {
+  text-align: right;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+th:first-child,
+td:first-child {
+  text-align: left;
+  white-space: normal;
+  min-width: 12rem;
+}
+
+thead th {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+td {
+  font-variant-numeric: tabular-nums;
+}
+
+details > summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 0.3rem 0;
+}
+
+/* --- Status / banners --------------------------------------------------- */
+
+.banner {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--axis);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0 0 1rem;
+  background: var(--surface-1);
+}
+
+.banner strong {
+  color: var(--text-primary);
+}
+
+.status {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  min-height: 1.2em;
+}
+
+.dot-live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0ca30c;
+  display: inline-block;
+  margin-right: 0.4rem;
+  vertical-align: 0.05em;
+}
+
+/* Refetches hold the previous render rather than flashing a skeleton. */
+.is-stale {
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+
+/* --- Presenter view ----------------------------------------------------- */
+
+body.present {
+  background: var(--page);
+}
+
+.present .wrap {
+  max-width: 1500px;
+  padding-top: 1rem;
+}
+
+.present-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.1fr) minmax(260px, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+/* The radar is square, so an unbounded column makes it absurdly tall on a wide
+   screen and pushes the controls below the fold. */
+.present .radar-figure > .radar-holder {
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1000px) {
+  .present-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.join-panel {
+  text-align: center;
+}
+
+.join-code {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.1;
+  margin: 0.2rem 0;
+}
+
+.join-url {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+
+#qr {
+  display: block;
+  margin: 0.8rem auto 0.5rem;
+  width: min(230px, 60vw);
+  height: auto;
+  image-rendering: pixelated;
+  background: #fff;
+  padding: 10px;
+  border-radius: var(--radius);
+}
+
+.archetype-ranks {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+}
+
+.archetype-ranks li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.archetype-ranks li:first-child {
+  border-top: none;
+}
+
+.bar-track {
+  grid-column: 1 / -1;
+  height: 5px;
+  background: var(--gridline);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--series-mean);
+  border-radius: 3px;
+}
+
+.rank-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.rank-value {
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+/* --- Small multiples ---------------------------------------------------- */
+
+.multiples {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.6rem;
+}
+
+.multiple {
+  text-align: center;
+}
+
+.multiple h3 {
+  font-size: 0.8rem;
+  margin: 0.2rem 0 0;
+}
+
+.multiple .sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

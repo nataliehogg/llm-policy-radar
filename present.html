@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Presenter view — Language AI policy radar</title>
+    <meta name="robots" content="noindex" />
+    <link rel="stylesheet" href="vendor/fonts/eb-garamond.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>📡</text></svg>"
+    />
+  </head>
+  <body class="present">
+    <header class="site-head no-print">
+      <div class="wrap">
+        <div>
+          <h1>How does this group prioritise?</h1>
+          <p class="muted small">
+            Eleven objectives from Ntampaka et al., <em>Some Assembly Required</em> (Figure 1) ·
+            1 = low priority, 5 = highly prioritised
+          </p>
+        </div>
+        <div class="head-actions">
+          <button id="theme-toggle" type="button">Theme</button>
+          <button id="new-session" type="button">New code</button>
+          <button id="reset-session" type="button">Clear votes</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div id="config-banner" class="banner" hidden>
+        <strong>No backend configured.</strong> The presenter view needs Firebase to collect votes —
+        see <code>SETUP.md</code>. The radar below still renders the archetype profiles.
+      </div>
+
+      <div class="present-grid">
+        <div>
+          <figure class="radar-figure">
+            <div class="radar-holder">
+              <svg
+                id="radar"
+                role="img"
+                aria-label="Group mean priorities across eleven Language AI policy objectives. The table view below gives the same values."
+              ></svg>
+            </div>
+            <ul class="legend" id="legend"></ul>
+          </figure>
+
+          <div class="no-print" style="margin-top: 0.6rem">
+            <p class="theme-title">Overlay archetypes</p>
+            <ul class="chips" id="archetype-chips"></ul>
+          </div>
+        </div>
+
+        <div>
+          <div class="card join-panel">
+            <p class="theme-title" style="margin-bottom: 0.1rem">Join at</p>
+            <p class="join-url" id="join-url">—</p>
+            <img id="qr" alt="QR code linking to the voting page for this session" />
+            <p class="theme-title" style="margin-bottom: 0">or enter code</p>
+            <p class="join-code" id="join-code">—</p>
+          </div>
+
+          <div class="card">
+            <div class="stat-row">
+              <div class="stat">
+                <span class="value" id="stat-n">0</span>
+                <span class="label">responses</span>
+              </div>
+              <div class="stat">
+                <span class="value" id="stat-spread">—</span>
+                <span class="label">mean σ across axes</span>
+              </div>
+            </div>
+            <p class="status" id="status" role="status"></p>
+          </div>
+
+          <div class="card">
+            <h2>Closest archetype</h2>
+            <ul class="archetype-ranks" id="ranks"></ul>
+            <p class="small muted" id="ranks-empty" style="margin: 0.4rem 0 0">
+              Waiting for the first response.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>Most disagreement</h2>
+            <ol class="small" id="disagreement" style="margin: 0.3rem 0 0; padding-left: 1.2rem">
+              <li class="muted">Waiting for responses.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1.5rem">
+        <h2>Group mean against each archetype</h2>
+        <div class="multiples" id="multiples"></div>
+      </div>
+
+      <div class="card">
+        <h2>The numbers</h2>
+        <details>
+          <summary>Show table view</summary>
+          <div class="table-scroll"><table id="table-view"></table></div>
+        </details>
+      </div>
+    </main>
+
+    <div class="tooltip" id="tooltip" role="tooltip" aria-hidden="true"></div>
+
+    <script src="vendor/qrcode.js"></script>
+    <script type="module" src="js/present.js"></script>
+  </body>
+</html>

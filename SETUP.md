@@ -1,0 +1,141 @@
+# Setup
+
+Two things to do: create a Firebase project (about five minutes, in a browser),
+then publish to GitHub Pages.
+
+Without step 1 the site still works — sliders, archetype comparison, your own
+radar — but votes cannot be shared between people.
+
+---
+
+## 1. Firebase Realtime Database
+
+### Create the project
+
+1. Go to <https://console.firebase.google.com> and sign in.
+2. **Create a project**. Call it whatever you like, e.g. `ai-policy-radar`.
+3. Google Analytics is not needed — switch it off.
+
+### Create the database
+
+4. In the left sidebar: **Build → Realtime Database → Create Database**.
+   (Realtime Database, *not* Firestore — this site uses the former.)
+5. Pick a location. `europe-west1` is the sensible one from the UK.
+6. When asked about security rules, choose **Start in locked mode**. The next
+   step replaces them anyway, and locked mode avoids the 30-day expiry warning
+   that test mode carries.
+
+### Set the security rules
+
+7. Open the **Rules** tab and replace everything with:
+
+```json
+{
+  "rules": {
+    "sessions": {
+      "$code": {
+        "responses": {
+          ".read": true,
+          ".write": true,
+          "$client": {
+            ".validate": "newData.hasChildren(['scores'])",
+            "scores": {
+              "$axis": {
+                ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5"
+              }
+            },
+            "ts": { ".validate": true }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+8. **Publish**.
+
+What these rules do: anyone can read and write responses inside a session, but
+only responses — nothing else in the database is reachable, and a score has to
+be a number from 1 to 5, so the shape of the data cannot be corrupted.
+
+What they deliberately do not do: stop someone who has the code from submitting
+several times from different browsers, or from clearing the votes. That is the
+right trade for a group meeting — the alternative is making everyone sign in.
+Codes are not secret; treat them like a room number, not a password.
+
+### Get the config
+
+9. Click the gear icon → **Project settings**.
+10. Scroll to **Your apps**, click the web icon (`</>`).
+11. Register the app with any nickname. **Do not** tick Firebase Hosting — GitHub
+    Pages is doing that job.
+12. Copy the `firebaseConfig` object it shows you.
+13. Paste the values into `firebase-config.js` in this repo.
+
+`databaseURL` must be present. If it is missing from the snippet, go back to
+Realtime Database and copy the URL from the top of the Data tab — it looks like
+`https://your-project-default-rtdb.europe-west1.firebasedatabase.app`.
+
+> These keys are **not secrets**. Firebase web config is public by design; the
+> security rules above are what actually control access. Committing this file is
+> expected.
+
+---
+
+## 2. Publish to GitHub Pages
+
+From this directory:
+
+```bash
+git init
+git add .
+git commit -m "Language AI policy priorities radar"
+gh repo create radarsite --public --source=. --push
+```
+
+Then turn on Pages:
+
+```bash
+gh api -X POST repos/:owner/radarsite/pages \
+  -f 'source[branch]=main' -f 'source[path]=/'
+```
+
+Or through the web UI: **Settings → Pages → Source: Deploy from a branch →
+main / (root)**.
+
+The site appears at `https://<your-username>.github.io/radarsite/` within a
+minute or two. Pushing to `main` redeploys it.
+
+---
+
+## 3. Check it works
+
+1. Open `present.html` — a code is generated automatically.
+2. Open `index.html?session=<that code>` in a second browser (or on your phone),
+   move some sliders, submit.
+3. The presenter view should update within a second, without a refresh.
+
+---
+
+## Running it before the meeting
+
+- **Rehearse the presenter view** with fabricated data:
+  `present.html?demo=9` — nine random responses, generated locally, never
+  written to the database.
+- **Force a theme** for the projector: add `?theme=light` or `?theme=dark` to
+  either page.
+- **Pre-select archetype overlays**:
+  `present.html?archetypes=trustworthiness,high_leverage`
+- **Test locally** without deploying:
+  `python3 -m http.server 8777` then open <http://127.0.0.1:8777/>.
+  It must be served over HTTP — opening the file directly with `file://` breaks
+  ES module imports.
+
+## On the day
+
+1. Open `present.html`, hit **New code**, screenshare it.
+2. People scan the QR or type the short URL and the code.
+3. Watch the mean and the ±1σ band fill in as responses arrive.
+4. **Clear votes** if you want to re-run the exercise after discussion — the
+   code stays the same, so nobody has to rejoin.
