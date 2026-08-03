@@ -51,16 +51,14 @@ Votes persist in the database indefinitely. There is no expiry — the only thin
 that deletes them is the presenter's **Clear votes** button. Reopening
 `present.html?session=CODE` brings a past session straight back.
 
-The presenter view can download a session as **CSV** (one row per respondent,
-one column per objective, with mean and standard deviation as trailing rows) or
-as **JSON** (the same data plus the axis metadata and summary statistics). Worth
-doing before clearing a session, since clearing is irreversible.
+**Download CSV** in the presenter header saves the session — one row per
+respondent, one column per objective, with mean and standard deviation as
+trailing rows. Worth doing before clearing, since clearing is irreversible.
 
 The security rules block listing the `/sessions` root, so the app cannot
-enumerate past sessions. Instead the presenter view keeps a local list of the
-codes *this browser* has presented, shown under "Earlier sessions". If you lose
-a code and clear that browser's storage, the Firebase console's Data tab is the
-remaining way to find it.
+enumerate past sessions. Codes presented from a browser are still recorded in
+its local storage, but there is no longer a UI listing them; the Firebase
+console's Data tab is the way to find an old code.
 
 ## Design notes
 

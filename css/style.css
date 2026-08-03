@@ -673,21 +673,6 @@ body.present {
   align-items: start;
 }
 
-/* The three summary boxes sit in a row under the radar and the join panel. */
-.present-bottom {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.25rem;
-  margin-top: 1.25rem;
-  align-items: start;
-}
-
-@media (max-width: 1000px) {
-  .present-bottom {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 /* The radar is square, so an unbounded column makes it absurdly tall on a wide
    screen and pushes the controls below the fold. */
 .present .radar-figure > .radar-holder {
@@ -728,72 +713,6 @@ body.present {
   background: #fff;
   padding: 10px;
   border-radius: var(--radius);
-}
-
-.archetype-ranks {
-  list-style: none;
-  margin: 0.4rem 0 0;
-  padding: 0;
-}
-
-.archetype-ranks li {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.5rem;
-  align-items: center;
-  padding: 0.3rem 0;
-  border-top: 1px solid var(--border);
-}
-
-.archetype-ranks li:first-child {
-  border-top: none;
-}
-
-.bar-track {
-  grid-column: 1 / -1;
-  height: 5px;
-  background: var(--gridline);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.bar-fill {
-  height: 100%;
-  background: var(--series-mean);
-  border-radius: 3px;
-}
-
-/* Correlation runs -1 to +1, so the track is anchored at its midpoint and the
-   bar grows left or right from there. */
-.bar-track--diverging {
-  position: relative;
-  /* The zero tick deliberately overhangs the track. */
-  overflow: visible;
-}
-
-.bar-track--diverging .bar-fill {
-  position: absolute;
-  top: 0;
-}
-
-.bar-zero {
-  position: absolute;
-  left: 50%;
-  top: -2px;
-  width: 1px;
-  height: 9px;
-  background: var(--axis);
-}
-
-.rank-name {
-  font-size: 0.88rem;
-  font-weight: 600;
-}
-
-.rank-value {
-  font-size: 0.85rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
 }
 
 /* --- Small multiples ---------------------------------------------------- */

@@ -26,6 +26,7 @@
         </div>
         <div class="head-actions">
           <button id="new-session" type="button">New code</button>
+          <button id="export-csv" type="button">Download CSV</button>
           <button id="reset-session" type="button">Clear votes</button>
         </div>
       </div>
@@ -61,6 +62,11 @@
           </div>
 
           <div class="card">
+            <h2>Group mean against each archetype</h2>
+            <div class="multiples" id="multiples"></div>
+          </div>
+
+          <div class="card">
             <div class="stat-row">
               <div class="stat">
                 <span class="value" id="stat-n">0</span>
@@ -75,43 +81,14 @@
           </div>
 
           <div class="card">
-            <h2>Group mean against each archetype</h2>
-            <div class="multiples" id="multiples"></div>
+            <h2>Most disagreement</h2>
+            <ol class="small" id="disagreement" style="margin: 0.3rem 0 0; padding-left: 1.2rem">
+              <li class="muted">Waiting for responses.</li>
+            </ol>
           </div>
         </div>
       </div>
 
-      <div class="present-bottom">
-        <div class="card">
-          <h2>Closest archetype</h2>
-          <ul class="archetype-ranks" id="ranks"></ul>
-          <p class="small muted" id="ranks-empty" style="margin: 0.4rem 0 0">
-            Waiting for the first response.
-          </p>
-        </div>
-
-        <div class="card">
-          <h2>Most disagreement</h2>
-          <ol class="small" id="disagreement" style="margin: 0.3rem 0 0; padding-left: 1.2rem">
-            <li class="muted">Waiting for responses.</li>
-          </ol>
-        </div>
-
-        <div class="card no-print">
-          <h2>Keep the results</h2>
-          <p class="small muted" style="margin-top: 0">
-            Votes stay until you clear them, so this code can be reopened any time.
-          </p>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
-            <button id="export-csv" type="button">Download CSV</button>
-            <button id="export-json" type="button">Download JSON</button>
-          </div>
-          <div id="recent-wrap" hidden>
-            <p class="theme-title" style="margin: 0.9rem 0 0.25rem">Earlier sessions</p>
-            <ul class="chips" id="recent-sessions"></ul>
-          </div>
-        </div>
-      </div>
     </main>
 
     <div class="tooltip" id="tooltip" role="tooltip" aria-hidden="true"></div>

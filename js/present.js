@@ -6,7 +6,6 @@ import { Radar } from './radar.js';
 import {
   renderLegend,
   renderMultiples,
-  renderRanks,
   Tooltip,
   axisTooltipHtml,
 } from './ui.js';
@@ -59,8 +58,9 @@ function setCode(code) {
   document.getElementById('join-url').textContent = code ? prettyUrl(code) : '—';
   if (code) {
     renderQr(code);
+    // Still recorded, so the "earlier sessions" list can be restored later
+    // without having lost the history in the meantime.
     store.rememberPresented(code);
-    renderRecentSessions();
   }
   // Keep the code in the URL so a refresh — or a second screen — lands in the
   // same session rather than minting a new one.
@@ -114,8 +114,6 @@ function draw() {
 
   const means = state.agg && state.agg.n ? meanScores(state.agg) : null;
   renderMultiples(document.getElementById('multiples'), means, { className: 's-mean' });
-  renderRanks(document.getElementById('ranks'), means);
-  document.getElementById('ranks-empty').hidden = Boolean(means);
   renderDisagreement();
 
   document.getElementById('stat-n').textContent = state.agg ? state.agg.n : 0;
@@ -196,45 +194,6 @@ function exportCsv() {
   download(`radar-${state.code}-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv');
 }
 
-function exportJson() {
-  if (!state.responses.length) {
-    setStatus('Nothing to export yet — no responses in this session.');
-    return;
-  }
-  const payload = {
-    session: state.code,
-    exportedAt: new Date().toISOString(),
-    source: 'Ntampaka et al., arXiv:2607.20836, Figure 1',
-    axes: AXES.map((a) => ({ id: a.id, label: a.label, section: a.section, theme: a.theme })),
-    // Respondent ids are the random per-browser identifiers, not people.
-    responses: state.responses.map((r, i) => ({ respondent: i + 1, scores: r.scores })),
-    summary: state.agg ? state.agg.stats : null,
-  };
-  download(
-    `radar-${state.code}-${new Date().toISOString().slice(0, 10)}.json`,
-    JSON.stringify(payload, null, 2),
-    'application/json'
-  );
-}
-
-function renderRecentSessions() {
-  const list = store.recentSessions().filter((s) => s.code !== state.code);
-  const wrap = document.getElementById('recent-wrap');
-  const ul = document.getElementById('recent-sessions');
-  wrap.hidden = !list.length;
-  ul.replaceChildren();
-  for (const { code, at } of list) {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.className = 'chip';
-    a.href = `present.html?session=${encodeURIComponent(code)}`;
-    a.textContent = code;
-    a.title = at ? `Presented ${new Date(at).toLocaleString('en-GB')}` : code;
-    li.appendChild(a);
-    ul.appendChild(li);
-  }
-}
-
 /* ------------------------------------------------------------------- init */
 
 function init() {
@@ -264,7 +223,6 @@ function init() {
   });
 
   document.getElementById('export-csv').addEventListener('click', exportCsv);
-  document.getElementById('export-json').addEventListener('click', exportJson);
 
   document.getElementById('reset-session').addEventListener('click', async () => {
     if (!state.code) return;

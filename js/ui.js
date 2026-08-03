@@ -144,29 +144,6 @@ export function renderMultiples(container, scores, opts = {}) {
   }
 }
 
-/** Bar list ranking the archetypes by similarity to the current profile. */
-export function renderRanks(container, scores) {
-  container.replaceChildren();
-  if (!scores) return;
-
-  for (const { archetype, r } of rankArchetypes(scores)) {
-    const li = document.createElement('li');
-    // The track spans r = -1 to +1 with zero at the midpoint, so the direction
-    // of the bar carries the sign and the number disambiguates it.
-    const half = r === null ? 0 : Math.abs(r) * 50;
-    const left = r === null ? 50 : r >= 0 ? 50 : 50 - half;
-    li.innerHTML = `
-      <span class="rank-name">${archetype.label}</span>
-      <span class="rank-value">${r === null ? '—' : `r = ${formatR(r)}`}</span>
-      <span class="bar-track bar-track--diverging">
-        <span class="bar-zero"></span>
-        <span class="bar-fill" style="left:${left}%; width:${half}%"></span>
-      </span>
-    `;
-    container.appendChild(li);
-  }
-}
-
 /**
  * Read-only value list, grouped by theme. The radar itself is the input now, so
  * this exists to keep every number visible at a glance and to give the axis
