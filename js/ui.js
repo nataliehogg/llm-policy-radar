@@ -152,7 +152,8 @@ export function renderMultiples(container, scores, opts = {}) {
     const cap = document.createElement('figcaption');
     // Always render the value line, even when r is undefined, so the panels do
     // not change height the moment a rating is dragged.
-    cap.innerHTML = `<h3>${archetype.label}</h3><span class="sub">r = ${formatR(r)}</span>`;
+    cap.innerHTML =
+      `<h3>${archetype.label}</h3><span class="sub">Pearson r = ${formatR(r)}</span>`;
 
     fig.append(holder, cap);
     container.appendChild(fig);

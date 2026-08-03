@@ -244,9 +244,10 @@ function init() {
     renderReadout(readout, state.scores, (index) => radar.setActiveAxis(index));
   }
 
-  // Archetype toggles.
+  // Archetype toggles. Absent on the participant page, where the four
+  // small-multiple panels already show every archetype.
   const chips = document.getElementById('archetype-chips');
-  for (const a of ARCHETYPES) {
+  for (const a of chips ? ARCHETYPES : []) {
     const li = document.createElement('li');
     const btn = document.createElement('button');
     btn.type = 'button';
