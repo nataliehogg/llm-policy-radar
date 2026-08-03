@@ -4,7 +4,6 @@
 import { AXES, ARCHETYPES, ARCHETYPE_BY_ID, defaultScores, aggregate } from './data.js';
 import { Radar } from './radar.js';
 import {
-  initTheme,
   renderLegend,
   renderReadout,
   syncReadout,
@@ -210,8 +209,6 @@ async function submit() {
 /* ------------------------------------------------------------------- init */
 
 function init() {
-  initTheme();
-
   radar = new Radar(document.getElementById('radar'), {
     size: 560,
     editScores: () => state.scores,
@@ -302,8 +299,7 @@ function init() {
       if (ev.key === 'Enter') submit();
     });
     document.getElementById('session-extra').textContent =
-      'Anonymous. Nothing is sent until you press submit — dragging points on their own never ' +
-      'changes the group average. Resubmitting replaces your previous answer.';
+      'Anonymous. Nothing is sent until you press submit; resubmitting replaces your answer.';
     if (initialCode) joinSession(initialCode);
     else setStatus('Not in a session yet.');
     updateSessionActions();

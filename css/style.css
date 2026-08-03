@@ -1,10 +1,9 @@
 /* ===========================================================================
    Tokens
-   Colour roles resolve here and nowhere else, so light/dark swap in one place.
-   Archetypes are deliberately achromatic: they are reference context, and hue
-   is reserved for live data. (Four distinct archetype hues cannot clear the
-   all-pairs colour-blindness floors in dark mode, so identity is carried by
-   dash pattern and direct labels instead.)
+   Colour roles resolve here and nowhere else. Light only — there is no dark
+   mode. Archetypes are deliberately achromatic: they are reference context and
+   hue is reserved for live data, so identity is carried by dash pattern and by
+   direct labels on the small-multiple panels instead.
    =========================================================================== */
 
 :root {
@@ -29,41 +28,6 @@
   --font: 'EB Garamond', Garamond, Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme='light'])) {
-    color-scheme: dark;
-    --surface-1: #1a1a19;
-    --page: #0d0d0d;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --gridline: #2c2c2a;
-    --axis: #383835;
-    --border: rgba(255, 255, 255, 0.1);
-    --shadow: rgba(0, 0, 0, 0.5);
-    --series-you: #dc143c;
-    --series-mean: #ffffff;
-    --archetype: #a3a199;
-    --accent-soft: rgba(220, 20, 60, 0.18);
-  }
-}
-
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --surface-1: #1a1a19;
-  --page: #0d0d0d;
-  --text-primary: #ffffff;
-  --text-secondary: #c3c2b7;
-  --text-muted: #898781;
-  --gridline: #2c2c2a;
-  --axis: #383835;
-  --border: rgba(255, 255, 255, 0.1);
-  --shadow: rgba(0, 0, 0, 0.5);
-  --series-you: #dc143c;
-  --series-mean: #ffffff;
-  --archetype: #a3a199;
-  --accent-soft: rgba(220, 20, 60, 0.18);
-}
 
 * {
   box-sizing: border-box;
@@ -113,13 +77,13 @@ a {
 .wrap {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 4rem;
+  padding: 0.9rem 1.25rem 1rem;
 }
 
 .lede {
   color: var(--text-secondary);
-  max-width: 62ch;
-  margin: 0 0 1.25rem;
+  max-width: 100ch;
+  margin: 0 0 0.8rem;
 }
 
 .muted {
@@ -138,7 +102,7 @@ a {
 }
 
 .site-head .wrap {
-  padding-block: 1.25rem 1.1rem;
+  padding-block: 0.7rem 0.6rem;
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -226,9 +190,25 @@ input[type='text'] {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
-  gap: 1.5rem;
+  /* The right column carries the session box and the four archetype panels, so
+     it needs enough width for a 2x2 grid of small multiples. */
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 430px);
+  gap: 1.25rem;
   align-items: start;
+}
+
+/* Cap the participant radar so it does not grow to fill a wide column and push
+   everything below the fold. */
+body:not(.present) .radar-figure > .radar-holder {
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+/* In the narrow right-hand column a 2x2 grid keeps each panel legible; the
+   presenter page leaves its row on auto-fit across the full width. */
+body:not(.present) .multiples {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 250px;
 }
 
 @media (max-width: 900px) {
@@ -241,11 +221,11 @@ input[type='text'] {
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 1.1rem 1.15rem;
+  padding: 0.9rem 1rem;
 }
 
 .card + .card {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .card h2 {
@@ -812,9 +792,9 @@ body.present {
 
 .multiples {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.9rem;
-  margin-top: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.5rem;
 }
 
 .multiple {

@@ -129,8 +129,6 @@ branch → main / (root)**.
 - **Rehearse the presenter view** with fabricated data:
   `present.html?demo=9` — nine random responses, generated locally, never
   written to the database.
-- **Force a theme** for the projector: add `?theme=light` or `?theme=dark` to
-  either page.
 - **Pre-select archetype overlays**:
   `present.html?archetypes=trustworthiness,high_leverage`
 - **Test locally** without deploying:

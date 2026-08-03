@@ -27,11 +27,6 @@
             >, Figure 1
           </p>
         </div>
-        <div class="head-actions no-print">
-          <button id="theme-toggle" type="button" aria-label="Switch between light and dark">
-            Theme
-          </button>
-        </div>
       </div>
     </header>
 
@@ -72,18 +67,6 @@
             </div>
           </div>
 
-          <div class="card">
-            <h2>Closest archetype</h2>
-            <p class="small muted" style="margin-top: 0">
-              Your profile against each of the paper's four laboratory archetypes, with your scores
-              drawn over that archetype's reference profile. <em>r</em> is the Pearson correlation
-              across the eleven objectives: it compares the <em>shape</em> of your priorities rather
-              than how high you rate things, so rating everything generously does not make you look
-              like any particular archetype. It needs at least two objectives rated differently —
-              while they all sit at the same value there is no shape to compare.
-            </p>
-            <div class="multiples" id="multiples"></div>
-          </div>
         </div>
 
         <!-- ---------------------------------------------------------------- -->
@@ -91,7 +74,7 @@
           <div class="card no-print" id="session-card">
             <h2>Group session</h2>
             <p class="small muted" style="margin-top: 0">
-              Enter the code from the presenter to add your scores to the group average.
+              Enter the presenter's code to join the group average.
             </p>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center">
               <label for="session-code" class="visually-hidden">Session code</label>
@@ -113,6 +96,14 @@
               <button id="withdraw-btn" type="button">Remove my response</button>
             </div>
             <p class="small muted" id="session-extra"></p>
+          </div>
+
+          <div class="card">
+            <h2>Closest archetype</h2>
+            <p class="small muted" style="margin-top: 0">
+              Pearson <em>r</em> — the <em>shape</em> of your priorities, not their level.
+            </p>
+            <div class="multiples" id="multiples"></div>
           </div>
 
           <!-- <div class="card">

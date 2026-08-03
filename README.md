@@ -58,12 +58,15 @@ remaining way to find it.
 
 ## Design notes
 
-**Archetypes are grey on purpose.** They are reference context, so hue is
-reserved for live data. Four distinct archetype colours cannot clear the
-all-pairs colour-blindness separation floors in dark mode — the closest
-candidates fail at ΔE 7.1 (red↔orange) and 9.8 (violet↔blue) against a floor of
-15 — so identity is carried by the paper's four dash patterns plus direct
-labels in the small-multiple panels instead.
+**Archetypes are grey on purpose.** They are reference context — the backdrop
+the group's own profile is read against — so hue is reserved for live data and
+identity is carried by the paper's four dash patterns plus the panel titles. It
+is also the safer choice: four archetype colours on one plot struggle to clear
+the all-pairs colour-blindness separation floors, with red↔orange measuring
+ΔE 7.1 against a floor of 15.
+
+**Light only.** There is no dark mode and no theme toggle; the colour tokens at
+the top of `css/style.css` are the whole palette.
 
 **The archetype numbers are estimates.** The paper plots the four profiles in
 Figure 1 but does not tabulate them, so the values in `js/data.js` were read off

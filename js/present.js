@@ -4,7 +4,6 @@
 import { AXES, ARCHETYPES, ARCHETYPE_BY_ID, aggregate, meanScores } from './data.js';
 import { Radar } from './radar.js';
 import {
-  initTheme,
   renderLegend,
   renderMultiples,
   renderRanks,
@@ -257,8 +256,6 @@ function renderRecentSessions() {
 /* ------------------------------------------------------------------- init */
 
 function init() {
-  initTheme();
-
   radar = new Radar(document.getElementById('radar'), {
     size: 620,
     labelChars: 13,

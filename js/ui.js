@@ -4,30 +4,6 @@ import { AXES, ARCHETYPES, rankArchetypes, formatR } from './data.js';
 import { Radar } from './radar.js';
 
 /**
- * Theme toggle that remembers the choice and still honours the OS default.
- * `?theme=light|dark` forces a mode for the session — handy when the projector
- * disagrees with your laptop about what looks readable.
- */
-export function initTheme(buttonId = 'theme-toggle') {
-  const forced = new URLSearchParams(location.search).get('theme');
-  const stored = localStorage.getItem('radar.theme');
-  if (forced === 'light' || forced === 'dark') {
-    document.documentElement.dataset.theme = forced;
-  } else if (stored) {
-    document.documentElement.dataset.theme = stored;
-  }
-  const btn = document.getElementById(buttonId);
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const current = document.documentElement.dataset.theme || (prefersDark ? 'dark' : 'light');
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = next;
-    localStorage.setItem('radar.theme', next);
-  });
-}
-
-/**
  * Legend swatches drawn as SVG so the dash pattern — which is what distinguishes
  * the four archetypes — is visible in the legend itself, not just on the chart.
  */
@@ -174,9 +150,9 @@ export function renderMultiples(container, scores, opts = {}) {
     holder.appendChild(svg);
 
     const cap = document.createElement('figcaption');
-    cap.innerHTML =
-      `<h3>${archetype.label}</h3>` +
-      (r === null ? '' : `<span class="sub">r = ${formatR(r)}</span>`);
+    // Always render the value line, even when r is undefined, so the panels do
+    // not change height the moment a rating is dragged.
+    cap.innerHTML = `<h3>${archetype.label}</h3><span class="sub">r = ${formatR(r)}</span>`;
 
     fig.append(holder, cap);
     container.appendChild(fig);
