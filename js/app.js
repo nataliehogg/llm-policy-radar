@@ -239,9 +239,13 @@ function init() {
     },
   });
 
-  renderReadout(document.getElementById('readout'), state.scores, (index) =>
-    radar.setActiveAxis(index)
-  );
+  // Optional panels. Anything below here must tolerate its element being absent,
+  // or removing one card from the HTML silently kills every feature wired after
+  // it — which is exactly what a missing #readout used to do.
+  const readout = document.getElementById('readout');
+  if (readout) {
+    renderReadout(readout, state.scores, (index) => radar.setActiveAxis(index));
+  }
 
   // Archetype toggles.
   const chips = document.getElementById('archetype-chips');
@@ -263,13 +267,13 @@ function init() {
     chips.appendChild(li);
   }
 
-  document.getElementById('reset-btn').addEventListener('click', () => {
+  document.getElementById('reset-btn')?.addEventListener('click', () => {
     state.scores = defaultScores();
     store.saveLocalScores(state.scores);
     draw();
   });
 
-  document.getElementById('copy-btn').addEventListener('click', async (ev) => {
+  document.getElementById('copy-btn')?.addEventListener('click', async (ev) => {
     const text = AXES.map((a) => `${a.label}\t${state.scores[a.id]}`).join('\n');
     try {
       await navigator.clipboard.writeText(text);
