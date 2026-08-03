@@ -144,3 +144,18 @@ branch → main / (root)**.
 3. Watch the mean and the ±1σ band fill in as responses arrive.
 4. **Clear votes** if you want to re-run the exercise after discussion — the
    code stays the same, so nobody has to rejoin.
+
+## Afterwards
+
+Votes are not deleted when the meeting ends; they stay under
+`sessions/<CODE>/responses` until you press **Clear votes**. Reopen
+`present.html?session=<CODE>` whenever you like.
+
+Before clearing anything, use **Download CSV** or **Download JSON** on the
+presenter view to keep a copy — clearing cannot be undone. The presenter view
+also lists codes you have previously presented from that browser.
+
+Tell people they can press **Leave session** when the meeting is over. It keeps
+their vote in the group average but detaches their browser, so playing with the
+sliders later cannot change the result. **Remove my response** is there for
+anyone who wants their vote taken out altogether.

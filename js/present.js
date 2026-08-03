@@ -19,6 +19,7 @@ const state = {
   agg: null,
   activeArchetypes: new Set(),
   unsub: null,
+  responses: [],
 };
 
 const tooltip = new Tooltip(document.getElementById('tooltip'));
@@ -59,7 +60,11 @@ function setCode(code) {
   state.code = code;
   document.getElementById('join-code').textContent = code || '—';
   document.getElementById('join-url').textContent = code ? prettyUrl(code) : '—';
-  if (code) renderQr(code);
+  if (code) {
+    renderQr(code);
+    store.rememberPresented(code);
+    renderRecentSessions();
+  }
   // Keep the code in the URL so a refresh — or a second screen — lands in the
   // same session rather than minting a new one.
   const url = new URL(location.href);
@@ -160,6 +165,7 @@ async function watch(code) {
     state.unsub = await store.watchSession(
       code,
       (responses) => {
+        state.responses = responses;
         state.agg = aggregate(responses);
         setStatus('Live — updates as people submit.', true);
         draw();
@@ -168,6 +174,83 @@ async function watch(code) {
     );
   } catch (err) {
     setStatus(`Could not connect: ${err.message}`);
+  }
+}
+
+/* ----------------------------------------------------------------- export */
+
+function download(filename, text, mime) {
+  const url = URL.createObjectURL(new Blob([text], { type: mime }));
+  const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * One row per respondent, one column per objective, plus the per-axis mean and
+ * standard deviation as trailing rows so the file is readable on its own.
+ */
+function exportCsv() {
+  if (!state.responses.length) {
+    setStatus('Nothing to export yet — no responses in this session.');
+    return;
+  }
+  const esc = (v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
+  const header = ['respondent', ...AXES.map((a) => a.label)];
+  const rows = state.responses.map((r, i) => [
+    `respondent_${i + 1}`,
+    ...AXES.map((a) => r.scores?.[a.id] ?? ''),
+  ]);
+  if (state.agg) {
+    const mean = (a) => {
+      const m = state.agg.stats[a.id].mean;
+      return typeof m === 'number' ? m.toFixed(3) : '';
+    };
+    rows.push(['mean', ...AXES.map(mean)]);
+    rows.push(['sd', ...AXES.map((a) => state.agg.stats[a.id].sd.toFixed(3))]);
+  }
+  const csv = [header, ...rows].map((r) => r.map(esc).join(',')).join('\n');
+  download(`radar-${state.code}-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv');
+}
+
+function exportJson() {
+  if (!state.responses.length) {
+    setStatus('Nothing to export yet — no responses in this session.');
+    return;
+  }
+  const payload = {
+    session: state.code,
+    exportedAt: new Date().toISOString(),
+    source: 'Ntampaka et al., arXiv:2607.20836, Figure 1',
+    axes: AXES.map((a) => ({ id: a.id, label: a.label, section: a.section, theme: a.theme })),
+    // Respondent ids are the random per-browser identifiers, not people.
+    responses: state.responses.map((r, i) => ({ respondent: i + 1, scores: r.scores })),
+    summary: state.agg ? state.agg.stats : null,
+  };
+  download(
+    `radar-${state.code}-${new Date().toISOString().slice(0, 10)}.json`,
+    JSON.stringify(payload, null, 2),
+    'application/json'
+  );
+}
+
+function renderRecentSessions() {
+  const list = store.recentSessions().filter((s) => s.code !== state.code);
+  const wrap = document.getElementById('recent-wrap');
+  const ul = document.getElementById('recent-sessions');
+  wrap.hidden = !list.length;
+  ul.replaceChildren();
+  for (const { code, at } of list) {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.className = 'chip';
+    a.href = `present.html?session=${encodeURIComponent(code)}`;
+    a.textContent = code;
+    a.title = at ? `Presented ${new Date(at).toLocaleString('en-GB')}` : code;
+    li.appendChild(a);
+    ul.appendChild(li);
   }
 }
 
@@ -226,10 +309,14 @@ function init() {
   document.getElementById('new-session').addEventListener('click', () => {
     const code = store.randomCode();
     state.agg = null;
+    state.responses = [];
     setCode(code);
     draw();
     watch(code);
   });
+
+  document.getElementById('export-csv').addEventListener('click', exportCsv);
+  document.getElementById('export-json').addEventListener('click', exportJson);
 
   document.getElementById('reset-session').addEventListener('click', async () => {
     if (!state.code) return;
@@ -256,7 +343,8 @@ function init() {
   // presenter view can be checked before the meeting. Never touches the backend.
   const demo = Number(params.get('demo'));
   if (Number.isFinite(demo) && demo > 0) {
-    state.agg = aggregate(fakeResponses(Math.min(demo, 40)));
+    state.responses = fakeResponses(Math.min(demo, 40));
+    state.agg = aggregate(state.responses);
     setCode(store.normaliseCode(params.get('session') || '') || 'DEMO');
     setStatus('Rehearsal mode — these responses are fabricated locally.');
     draw();

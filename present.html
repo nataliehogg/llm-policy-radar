@@ -92,6 +92,22 @@
               <li class="muted">Waiting for responses.</li>
             </ol>
           </div>
+
+          <div class="card no-print">
+            <h2>Keep the results</h2>
+            <p class="small muted" style="margin-top: 0">
+              Votes stay in the database until you clear them, so this code can be reopened any
+              time. Downloading a copy keeps them even if the session is later cleared.
+            </p>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+              <button id="export-csv" type="button">Download CSV</button>
+              <button id="export-json" type="button">Download JSON</button>
+            </div>
+            <div id="recent-wrap" hidden>
+              <p class="theme-title" style="margin: 0.9rem 0 0.25rem">Earlier sessions</p>
+              <ul class="chips" id="recent-sessions"></ul>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -12,6 +12,7 @@ import { firebaseConfig } from '../firebase-config.js';
 const LS_CLIENT_ID = 'radar.clientId';
 const LS_SCORES = 'radar.scores';
 const LS_LAST_SESSION = 'radar.lastSession';
+const LS_PRESENTED = 'radar.presentedSessions';
 
 export const isConfigured = Boolean(
   firebaseConfig && firebaseConfig.apiKey && firebaseConfig.databaseURL
@@ -95,6 +96,44 @@ export function lastSession() {
     return localStorage.getItem(LS_LAST_SESSION) || '';
   } catch {
     return '';
+  }
+}
+
+/**
+ * Stop this browser rejoining a session on the next visit. Deliberately does not
+ * touch the stored response — someone who voted in a meeting should stay in that
+ * meeting's average even after they leave the page.
+ */
+export function forgetSession() {
+  try {
+    localStorage.removeItem(LS_LAST_SESSION);
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Codes this browser has presented. The security rules block listing the
+ * /sessions root — by design — so the presenter needs a local record to find
+ * past sessions again.
+ */
+export function recentSessions() {
+  try {
+    const raw = localStorage.getItem(LS_PRESENTED);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+export function rememberPresented(code) {
+  try {
+    const list = recentSessions().filter((s) => s.code !== code);
+    list.unshift({ code, at: Date.now() });
+    localStorage.setItem(LS_PRESENTED, JSON.stringify(list.slice(0, 12)));
+  } catch {
+    /* ignore */
   }
 }
 

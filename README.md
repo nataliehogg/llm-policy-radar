@@ -28,6 +28,34 @@ being counted twice. Nothing identifying is stored — just eleven numbers.
 Codes are a room number, not a secret. Anyone holding one can submit or clear
 the votes, which is the right trade for a group meeting.
 
+**Nothing is submitted implicitly.** Moving the sliders only ever changes your
+own radar; the group average changes when you press the button and at no other
+time.
+
+**Leaving.** *Leave session* detaches this browser — it forgets the code, drops
+it from the URL, and stops the live updates, so later fiddling with the sliders
+cannot reach the group. Your already-submitted response stays in the average,
+which is usually what you want: you did vote in the meeting. If you want out
+entirely, *Remove my response* deletes it and the average is recalculated
+without you.
+
+## Keeping the results
+
+Votes persist in the database indefinitely. There is no expiry — the only thing
+that deletes them is the presenter's **Clear votes** button. Reopening
+`present.html?session=CODE` brings a past session straight back.
+
+The presenter view can download a session as **CSV** (one row per respondent,
+one column per objective, with mean and standard deviation as trailing rows) or
+as **JSON** (the same data plus the axis metadata and summary statistics). Worth
+doing before clearing a session, since clearing is irreversible.
+
+The security rules block listing the `/sessions` root, so the app cannot
+enumerate past sessions. Instead the presenter view keeps a local list of the
+codes *this browser* has presented, shown under "Earlier sessions". If you lose
+a code and clear that browser's storage, the Firebase console's Data tab is the
+remaining way to find it.
+
 ## Design notes
 
 **Archetypes are grey on purpose.** They are reference context, so hue is

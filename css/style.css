@@ -69,6 +69,13 @@
   box-sizing: border-box;
 }
 
+/* The UA rule for [hidden] is display:none, but any author `display` rule beats
+   it on specificity — including `button { display: inline-flex }` below and the
+   inline `display:flex` on toggled rows. Without this, hidden elements show. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: var(--font);

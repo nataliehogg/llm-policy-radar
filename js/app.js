@@ -94,6 +94,65 @@ function setStatus(msg, live = false) {
   node.innerHTML = live ? `<span class="dot-live"></span>${msg}` : msg;
 }
 
+function updateSessionActions() {
+  const actions = document.getElementById('session-actions');
+  if (!actions) return;
+  actions.hidden = !state.session;
+  document.getElementById('withdraw-btn').hidden = !state.submitted;
+}
+
+/**
+ * Detach from the session without touching the submitted response: someone who
+ * voted in the meeting stays in that meeting's average. Their sliders keep
+ * working locally, and nothing they do afterwards reaches the group.
+ */
+function leaveSession() {
+  if (state.unsub) {
+    state.unsub();
+    state.unsub = null;
+  }
+  const left = state.session;
+  state.session = '';
+  state.agg = null;
+  state.submitted = false;
+  store.forgetSession();
+  document.getElementById('session-code').value = '';
+  document.getElementById('submit-btn').textContent = 'Submit my scores';
+  // Drop the code from the URL too, or a refresh silently rejoins.
+  const url = new URL(location.href);
+  url.searchParams.delete('session');
+  url.searchParams.delete('s');
+  history.replaceState(null, '', url);
+  setStatus(
+    left
+      ? `Left <strong>${left}</strong>. Your scores are yours alone now — change them freely, ` +
+          'nothing is sent to the group unless you rejoin and submit.'
+      : 'Not in a session.'
+  );
+  updateSessionActions();
+  draw();
+}
+
+async function withdraw() {
+  const code = state.session;
+  if (!code) return;
+  if (!confirm(`Remove your response from session ${code}? The group average will be recalculated without it.`)) {
+    return;
+  }
+  const btn = document.getElementById('withdraw-btn');
+  btn.disabled = true;
+  try {
+    await store.withdrawResponse(code);
+    state.submitted = false;
+    setStatus(`Your response has been removed from <strong>${code}</strong>.`);
+    updateSessionActions();
+  } catch (err) {
+    setStatus(`Could not remove: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 async function joinSession(code) {
   if (state.unsub) {
     state.unsub();
@@ -102,6 +161,7 @@ async function joinSession(code) {
   state.session = code;
   state.agg = null;
   if (!code) {
+    updateSessionActions();
     draw();
     return;
   }
@@ -122,6 +182,7 @@ async function joinSession(code) {
           }${mine ? ', including yours' : ''}.`,
           true
         );
+        updateSessionActions();
         draw();
       },
       (err) => setStatus(`Could not read session: ${err.message}`)
@@ -231,6 +292,8 @@ function init() {
   } else {
     codeInput.value = initialCode;
     document.getElementById('submit-btn').addEventListener('click', submit);
+    document.getElementById('leave-btn').addEventListener('click', leaveSession);
+    document.getElementById('withdraw-btn').addEventListener('click', withdraw);
     codeInput.addEventListener('change', () => {
       const code = store.normaliseCode(codeInput.value);
       codeInput.value = code;
@@ -240,9 +303,11 @@ function init() {
       if (ev.key === 'Enter') submit();
     });
     document.getElementById('session-extra').textContent =
-      'Anonymous. You can change your answer at any time — resubmitting replaces your previous one.';
+      'Anonymous. Nothing is sent until you press submit — moving the sliders on their own never ' +
+      'changes the group average. Resubmitting replaces your previous answer.';
     if (initialCode) joinSession(initialCode);
     else setStatus('Not in a session yet.');
+    updateSessionActions();
   }
 
   draw();
