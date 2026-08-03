@@ -267,12 +267,6 @@ function init() {
     chips.appendChild(li);
   }
 
-  document.getElementById('reset-btn')?.addEventListener('click', () => {
-    state.scores = defaultScores();
-    store.saveLocalScores(state.scores);
-    draw();
-  });
-
   document.getElementById('copy-btn')?.addEventListener('click', async (ev) => {
     const text = AXES.map((a) => `${a.label}\t${state.scores[a.id]}`).join('\n');
     try {
