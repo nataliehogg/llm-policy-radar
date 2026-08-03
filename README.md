@@ -32,6 +32,12 @@ the votes, which is the right trade for a group meeting.
 own radar; the group average changes when you press the button and at no other
 time.
 
+**The participant page never shows the group mean** — only how many responses
+have been submitted. A live mean on everyone's screen would anchor them: early
+votes would pull later ones toward an average that is itself still moving, and
+since anyone can resubmit, the drift compounds. The group profile belongs on the
+presenter view, revealed when the presenter chooses.
+
 **Leaving.** *Leave session* detaches this browser — it forgets the code, drops
 it from the URL, and stops the live updates, so later fiddling with the radar
 cannot reach the group. Your already-submitted response stays in the average,

@@ -1,13 +1,12 @@
 // Presenter view: big radar of the live group mean, plus the join code and QR
 // for the room. Designed to be screenshared as-is.
 
-import { AXES, ARCHETYPES, ARCHETYPE_BY_ID, aggregate, meanScores } from './data.js';
+import { AXES, ARCHETYPES, aggregate, meanScores } from './data.js';
 import { Radar } from './radar.js';
 import {
   renderLegend,
   renderMultiples,
   renderRanks,
-  renderTable,
   Tooltip,
   axisTooltipHtml,
 } from './ui.js';
@@ -16,7 +15,6 @@ import * as store from './store.js';
 const state = {
   code: '',
   agg: null,
-  activeArchetypes: new Set(),
   unsub: null,
   responses: [],
 };
@@ -75,10 +73,6 @@ function setCode(code) {
 
 function seriesForMain() {
   const series = [];
-  for (const id of state.activeArchetypes) {
-    const a = ARCHETYPE_BY_ID[id];
-    series.push({ id: a.id, className: 's-archetype', scores: a.scores, dash: a.dash, fill: false });
-  }
   if (state.agg && state.agg.n) {
     const band = {};
     const means = {};
@@ -93,15 +87,8 @@ function seriesForMain() {
 }
 
 function legendEntries() {
-  const entries = [];
-  if (state.agg && state.agg.n) {
-    entries.push({ label: `Group mean (n=${state.agg.n}, shaded ±1σ)`, className: 's-mean' });
-  }
-  for (const id of state.activeArchetypes) {
-    const a = ARCHETYPE_BY_ID[id];
-    entries.push({ label: a.label, className: 's-archetype', dash: a.dash });
-  }
-  return entries;
+  if (!state.agg || !state.agg.n) return [];
+  return [{ label: `Group mean (n=${state.agg.n}, shaded ±1σ)`, className: 's-mean' }];
 }
 
 function renderDisagreement() {
@@ -129,11 +116,6 @@ function draw() {
   renderMultiples(document.getElementById('multiples'), means, { className: 's-mean' });
   renderRanks(document.getElementById('ranks'), means);
   document.getElementById('ranks-empty').hidden = Boolean(means);
-  renderTable(document.getElementById('table-view'), {
-    agg: state.agg,
-    yours: null,
-    archetypes: ARCHETYPES,
-  });
   renderDisagreement();
 
   document.getElementById('stat-n').textContent = state.agg ? state.agg.n : 0;
@@ -266,42 +248,11 @@ function init() {
         return;
       }
       tooltip.show(
-        axisTooltipHtml(index, {
-          agg: state.agg,
-          yours: null,
-          activeArchetypes: [...state.activeArchetypes].map((id) => ARCHETYPE_BY_ID[id]),
-        }),
+        axisTooltipHtml(index, { agg: state.agg, yours: null, activeArchetypes: [] }),
         ev
       );
     },
   });
-
-  // ?archetypes=trustworthiness,craftsmanship pre-selects overlays, so a
-  // particular comparison can be bookmarked or put straight into slides.
-  const preset = new URLSearchParams(location.search).get('archetypes');
-  if (preset) {
-    for (const id of preset.split(',').map((s) => s.trim())) {
-      if (ARCHETYPE_BY_ID[id]) state.activeArchetypes.add(id);
-    }
-  }
-
-  const chips = document.getElementById('archetype-chips');
-  for (const a of ARCHETYPES) {
-    const li = document.createElement('li');
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'chip';
-    btn.textContent = a.label;
-    btn.setAttribute('aria-pressed', String(state.activeArchetypes.has(a.id)));
-    btn.addEventListener('click', () => {
-      if (state.activeArchetypes.has(a.id)) state.activeArchetypes.delete(a.id);
-      else state.activeArchetypes.add(a.id);
-      btn.setAttribute('aria-pressed', String(state.activeArchetypes.has(a.id)));
-      draw();
-    });
-    li.appendChild(btn);
-    chips.appendChild(li);
-  }
 
   document.getElementById('new-session').addEventListener('click', () => {
     const code = store.randomCode();

@@ -1,7 +1,7 @@
 // Participant page: rate the eleven objectives, compare with the archetypes,
 // and optionally submit into a shared session.
 
-import { AXES, ARCHETYPES, ARCHETYPE_BY_ID, defaultScores, aggregate } from './data.js';
+import { AXES, defaultScores } from './data.js';
 import { Radar } from './radar.js';
 import {
   renderLegend,
@@ -15,8 +15,11 @@ import * as store from './store.js';
 
 const state = {
   scores: store.loadLocalScores() || defaultScores(),
-  activeArchetypes: new Set(),
-  agg: null,
+  // Deliberately NOT the group's scores — only how many have been submitted.
+  // Showing a live group mean here would anchor people: early votes would pull
+  // later ones toward an average that is itself still moving. The presenter
+  // view is where the group profile gets revealed, when the presenter chooses.
+  responseCount: 0,
   session: '',
   submitted: false,
   unsub: null,
@@ -32,53 +35,11 @@ let radar;
 
 /* ------------------------------------------------------------------ chart */
 
-function seriesForMain() {
-  const series = [];
-  for (const id of state.activeArchetypes) {
-    const a = ARCHETYPE_BY_ID[id];
-    series.push({
-      id: a.id,
-      className: 's-archetype',
-      scores: a.scores,
-      dash: a.dash,
-      fill: false,
-    });
-  }
-  if (state.agg && state.agg.n) {
-    const band = {};
-    const means = {};
-    for (const axis of AXES) {
-      const s = state.agg.stats[axis.id];
-      means[axis.id] = s.mean ?? 1;
-      band[axis.id] = [
-        Math.max(1, (s.mean ?? 1) - s.sd),
-        Math.min(5, (s.mean ?? 1) + s.sd),
-      ];
-    }
-    series.push({ id: 'mean', className: 's-mean', scores: means, band, markers: true });
-  }
-  series.push({ id: 'you', className: 's-you', scores: state.scores, markers: true });
-  return series;
-}
-
-function legendEntries() {
-  const entries = [];
-  entries.push({ label: 'You', className: 's-you' });
-  if (state.agg && state.agg.n) {
-    entries.push({ label: `Group mean (n=${state.agg.n}, shaded ±1σ)`, className: 's-mean' });
-  }
-  for (const id of state.activeArchetypes) {
-    const a = ARCHETYPE_BY_ID[id];
-    entries.push({ label: a.label, className: 's-archetype', dash: a.dash });
-  }
-  return entries;
-}
-
 function draw() {
-  radar.setSeries(seriesForMain());
+  radar.setSeries([{ id: 'you', className: 's-you', scores: state.scores, markers: true }]);
   radar.syncAria(state.scores);
   syncReadout(state.scores);
-  renderLegend(document.getElementById('legend'), legendEntries());
+  renderLegend(document.getElementById('legend'), [{ label: 'You', className: 's-you' }]);
   renderMultiples(document.getElementById('multiples'), state.scores);
 }
 
@@ -108,7 +69,7 @@ function leaveSession() {
   }
   const left = state.session;
   state.session = '';
-  state.agg = null;
+  state.responseCount = 0;
   state.submitted = false;
   store.forgetSession();
   document.getElementById('session-code').value = '';
@@ -154,7 +115,7 @@ async function joinSession(code) {
     state.unsub = null;
   }
   state.session = code;
-  state.agg = null;
+  state.responseCount = 0;
   if (!code) {
     updateSessionActions();
     draw();
@@ -165,15 +126,15 @@ async function joinSession(code) {
     state.unsub = await store.watchSession(
       code,
       (responses) => {
-        state.agg = aggregate(responses);
+        state.responseCount = responses.length;
         const mine = responses.some((r) => r.id === store.getClientId());
         state.submitted = mine;
         document.getElementById('submit-btn').textContent = mine
           ? 'Update my scores'
           : 'Submit my scores';
         setStatus(
-          `Live in <strong>${code}</strong> — ${state.agg ? state.agg.n : 0} response${
-            state.agg && state.agg.n === 1 ? '' : 's'
+          `Live in <strong>${code}</strong> — ${state.responseCount} response${
+            state.responseCount === 1 ? '' : 's'
           }${mine ? ', including yours' : ''}.`,
           true
         );
@@ -226,11 +187,7 @@ function init() {
         return;
       }
       tooltip.show(
-        axisTooltipHtml(index, {
-          agg: state.agg,
-          yours: state.scores,
-          activeArchetypes: [...state.activeArchetypes].map((id) => ARCHETYPE_BY_ID[id]),
-        }),
+        axisTooltipHtml(index, { agg: null, yours: state.scores, activeArchetypes: [] }),
         ev
       );
     },
@@ -242,27 +199,6 @@ function init() {
   const readout = document.getElementById('readout');
   if (readout) {
     renderReadout(readout, state.scores, (index) => radar.setActiveAxis(index));
-  }
-
-  // Archetype toggles. Absent on the participant page, where the four
-  // small-multiple panels already show every archetype.
-  const chips = document.getElementById('archetype-chips');
-  for (const a of chips ? ARCHETYPES : []) {
-    const li = document.createElement('li');
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'chip';
-    btn.textContent = a.label;
-    btn.setAttribute('aria-pressed', 'false');
-    btn.title = `${a.optimises} — ${a.question}`;
-    btn.addEventListener('click', () => {
-      if (state.activeArchetypes.has(a.id)) state.activeArchetypes.delete(a.id);
-      else state.activeArchetypes.add(a.id);
-      btn.setAttribute('aria-pressed', String(state.activeArchetypes.has(a.id)));
-      draw();
-    });
-    li.appendChild(btn);
-    chips.appendChild(li);
   }
 
   document.getElementById('copy-btn')?.addEventListener('click', async (ev) => {

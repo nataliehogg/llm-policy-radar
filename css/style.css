@@ -204,13 +204,6 @@ body:not(.present) .radar-figure > .radar-holder {
   margin: 0 auto;
 }
 
-/* In the narrow right-hand column a 2x2 grid keeps each panel legible; the
-   presenter page leaves its row on auto-fit across the full width. */
-body:not(.present) .multiples {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
@@ -675,15 +668,30 @@ body.present {
 
 .present-grid {
   display: grid;
-  grid-template-columns: minmax(0, 2.1fr) minmax(260px, 1fr);
-  gap: 2rem;
+  grid-template-columns: minmax(0, 1fr) minmax(520px, 640px);
+  gap: 1.25rem;
   align-items: start;
+}
+
+/* The three summary boxes sit in a row under the radar and the join panel. */
+.present-bottom {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .present-bottom {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* The radar is square, so an unbounded column makes it absurdly tall on a wide
    screen and pushes the controls below the fold. */
 .present .radar-figure > .radar-holder {
-  max-width: 780px;
+  max-width: 640px;
   margin: 0 auto;
 }
 
@@ -790,10 +798,12 @@ body.present {
 
 /* --- Small multiples ---------------------------------------------------- */
 
+/* Both pages show the four archetype panels as a single row beside the radar,
+   so this is a fixed four-column grid rather than auto-fit. */
 .multiples {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.7rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
   margin-top: 0.5rem;
 }
 

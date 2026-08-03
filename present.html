@@ -18,8 +18,10 @@
         <div>
           <h1>How does this group prioritise?</h1>
           <p class="muted small">
-            Eleven objectives from Ntampaka et al., <em>Some Assembly Required</em> (Figure 1) ·
-            1 = low priority, 5 = highly prioritised
+            The eleven objectives of
+            <a href="https://arxiv.org/abs/2607.20836" target="_blank" rel="noopener"
+              >Ntampaka et al., <em>How to Craft the Right Language AI Policy For Your Research Group (Some Assembly Required)</em></a
+            >, Figure 1
           </p>
         </div>
         <div class="head-actions">
@@ -42,16 +44,11 @@
               <svg
                 id="radar"
                 role="img"
-                aria-label="Group mean priorities across eleven Language AI policy objectives. The table view below gives the same values."
+                aria-label="Group mean priorities across eleven Language AI policy objectives."
               ></svg>
             </div>
             <ul class="legend" id="legend"></ul>
           </figure>
-
-          <div class="no-print" style="margin-top: 0.6rem">
-            <p class="theme-title">Overlay archetypes</p>
-            <ul class="chips" id="archetype-chips"></ul>
-          </div>
         </div>
 
         <div>
@@ -78,53 +75,42 @@
           </div>
 
           <div class="card">
-            <h2>Closest archetype</h2>
-            <p class="small muted" style="margin-top: 0">
-              Pearson <em>r</em> between the group mean and each archetype, across the eleven
-              objectives — the shape of the priorities, not their level.
-            </p>
-            <ul class="archetype-ranks" id="ranks"></ul>
-            <p class="small muted" id="ranks-empty" style="margin: 0.4rem 0 0">
-              Waiting for the first response.
-            </p>
-          </div>
-
-          <div class="card">
-            <h2>Most disagreement</h2>
-            <ol class="small" id="disagreement" style="margin: 0.3rem 0 0; padding-left: 1.2rem">
-              <li class="muted">Waiting for responses.</li>
-            </ol>
-          </div>
-
-          <div class="card no-print">
-            <h2>Keep the results</h2>
-            <p class="small muted" style="margin-top: 0">
-              Votes stay in the database until you clear them, so this code can be reopened any
-              time. Downloading a copy keeps them even if the session is later cleared.
-            </p>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
-              <button id="export-csv" type="button">Download CSV</button>
-              <button id="export-json" type="button">Download JSON</button>
-            </div>
-            <div id="recent-wrap" hidden>
-              <p class="theme-title" style="margin: 0.9rem 0 0.25rem">Earlier sessions</p>
-              <ul class="chips" id="recent-sessions"></ul>
-            </div>
+            <h2>Group mean against each archetype</h2>
+            <div class="multiples" id="multiples"></div>
           </div>
         </div>
       </div>
 
-      <div class="card" style="margin-top: 1.5rem">
-        <h2>Group mean against each archetype</h2>
-        <div class="multiples" id="multiples"></div>
-      </div>
+      <div class="present-bottom">
+        <div class="card">
+          <h2>Closest archetype</h2>
+          <ul class="archetype-ranks" id="ranks"></ul>
+          <p class="small muted" id="ranks-empty" style="margin: 0.4rem 0 0">
+            Waiting for the first response.
+          </p>
+        </div>
 
-      <div class="card">
-        <h2>The numbers</h2>
-        <details>
-          <summary>Show table view</summary>
-          <div class="table-scroll"><table id="table-view"></table></div>
-        </details>
+        <div class="card">
+          <h2>Most disagreement</h2>
+          <ol class="small" id="disagreement" style="margin: 0.3rem 0 0; padding-left: 1.2rem">
+            <li class="muted">Waiting for responses.</li>
+          </ol>
+        </div>
+
+        <div class="card no-print">
+          <h2>Keep the results</h2>
+          <p class="small muted" style="margin-top: 0">
+            Votes stay until you clear them, so this code can be reopened any time.
+          </p>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+            <button id="export-csv" type="button">Download CSV</button>
+            <button id="export-json" type="button">Download JSON</button>
+          </div>
+          <div id="recent-wrap" hidden>
+            <p class="theme-title" style="margin: 0.9rem 0 0.25rem">Earlier sessions</p>
+            <ul class="chips" id="recent-sessions"></ul>
+          </div>
+        </div>
       </div>
     </main>
 
