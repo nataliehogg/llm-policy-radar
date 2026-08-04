@@ -99,15 +99,40 @@ export function axisTooltipHtml(axisIndex, { agg, yours, activeArchetypes }) {
 }
 
 /**
+ * Tooltip body for an archetype: the paper's prose description (§2) over its
+ * row of Table 1. The panels themselves only have room for a label and an r.
+ */
+export function archetypeTooltipHtml(archetype) {
+  const rows = [
+    ['Optimises for', archetype.optimises],
+    ['Key question', archetype.question],
+    ["AI's role", archetype.aiRole],
+    ['Trades away', archetype.tradesAway],
+  ];
+  return `
+    <h3>${archetype.label}</h3>
+    <p class="small muted" style="margin:0">${archetype.description}</p>
+    <dl class="wide">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+  `;
+}
+
+/**
  * Four small radars, one per archetype, each with the live profile drawn over
  * that archetype's reference outline. This is how more than three reference
  * profiles get compared without putting four competing hues in one plot.
+ *
+ * Pass opts.tooltip to make each panel explain its archetype on hover or focus.
  */
 export function renderMultiples(container, scores, opts = {}) {
   const className = opts.className || 's-you';
+  const tooltip = opts.tooltip;
   const ranked = scores
     ? rankArchetypes(scores)
     : ARCHETYPES.map((archetype) => ({ archetype, r: null }));
+
+  // A re-render tears out the node the pointer is over, so its pointerleave
+  // never fires and the tooltip would be stranded on screen.
+  if (tooltip && container.querySelector('.multiple:hover')) tooltip.hide();
 
   container.replaceChildren();
   for (const { archetype, r } of ranked) {
@@ -127,6 +152,20 @@ export function renderMultiples(container, scores, opts = {}) {
       `<h3>${archetype.label}</h3><span class="sub">Pearson r = ${formatR(r)}</span>`;
 
     fig.append(holder, cap);
+
+    if (tooltip) {
+      // Focusable so the description is reachable without a pointer; the panel
+      // is a single descriptive unit, hence one tab stop rather than four.
+      fig.tabIndex = 0;
+      fig.setAttribute('aria-label', `${archetype.label}: ${archetype.description}`);
+      const html = archetypeTooltipHtml(archetype);
+      fig.addEventListener('pointerenter', (ev) => tooltip.show(html, ev));
+      fig.addEventListener('pointermove', (ev) => tooltip.move(ev));
+      fig.addEventListener('pointerleave', () => tooltip.hide());
+      fig.addEventListener('focus', (ev) => tooltip.show(html, ev));
+      fig.addEventListener('blur', () => tooltip.hide());
+    }
+
     container.appendChild(fig);
 
     const radar = new Radar(svg, { size: 200, labels: false, ticks: false });

@@ -446,6 +446,22 @@ body:not(.present) .radar-figure > .radar-holder {
   font-variant-numeric: tabular-nums;
 }
 
+/* The archetype tooltip pairs labels with short phrases rather than numbers, so
+   it needs a wider box and ordinary left-aligned, wrapping values. */
+.tooltip:has(dl.wide) {
+  max-width: 24rem;
+}
+
+.tooltip dl.wide {
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.2rem 0.7rem;
+}
+
+.tooltip dl.wide dd {
+  text-align: left;
+  font-variant-numeric: normal;
+}
+
 /* --- Sliders ------------------------------------------------------------ */
 
 .axis-list {
@@ -786,6 +802,15 @@ body.present {
 
 .multiple {
   text-align: center;
+  /* Each panel is hoverable for its archetype description. */
+  cursor: help;
+  border-radius: var(--radius);
+  outline-offset: 2px;
+}
+
+.multiple:hover,
+.multiple:focus-visible {
+  background: var(--page);
 }
 
 .multiple h3 {

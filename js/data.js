@@ -123,6 +123,10 @@ export const AXIS_IDS = AXES.map((a) => a.id);
 // ---------------------------------------------------------------------------
 // Archetype reference profiles.
 //
+// The descriptions condense the prose of §2; the optimises/question/aiRole/
+// tradesAway fields are the archetype's row of Table 1. Both are shown in the
+// tooltip on the small-multiple panels.
+//
 // IMPORTANT: the paper does not tabulate these numbers — they are read off the
 // Figure 1 radar by eye, so treat them as indicative rather than exact. They are
 // deliberately isolated here so they are trivial to correct: change a number and
@@ -137,6 +141,11 @@ export const ARCHETYPES = [
     id: 'high_leverage',
     label: 'High Leverage',
     dash: [],
+    description:
+      'Uses AI primarily as a force multiplier — a tool to remove the bottlenecks that ' +
+      'slow progress. Being first to a discovery is one version of this, but the broader ' +
+      'aim is to maximise scientific impact within limited resources, rather than simply ' +
+      'to maximise papers and minimise time.',
     optimises: 'Throughput & efficiency',
     question: 'Does this help us accomplish our goals efficiently?',
     aiRole: 'Force multiplier',
@@ -159,6 +168,11 @@ export const ARCHETYPES = [
     id: 'craftsmanship',
     label: 'Craftsmanship',
     dash: [7, 4],
+    description:
+      'Works on the philosophy that the primary product of research is not papers, but ' +
+      'scientists. Prioritises deep expertise developed through practice and failure, and ' +
+      'uses AI as a tutor — helping students learn while avoiding the shortcuts that bypass ' +
+      'the development of that expertise.',
     optimises: 'Expertise development',
     question: 'Are we developing capable researchers?',
     aiRole: 'Tutor',
@@ -181,9 +195,14 @@ export const ARCHETYPES = [
     id: 'trustworthiness',
     label: 'Trustworthiness',
     dash: [8, 3, 2, 3],
-    optimises: 'Rigour & reproducibility',
-    question: 'Can we stand behind this result?',
-    aiRole: 'Assistant under review',
+    description:
+      'Values reproducibility, validation, transparency and methodological rigour. Views AI ' +
+      'with scepticism and prioritises independent checks of AI-generated analyses: it will ' +
+      'not adopt AI hastily, but integrates it in ways that preserve the highest standards ' +
+      'of scientific integrity.',
+    optimises: 'Reliability & rigour',
+    question: 'Can I trust the process and result?',
+    aiRole: 'Verified assistant',
     tradesAway: 'Speed',
     scores: {
       fair_research_culture: 3,
@@ -203,6 +222,11 @@ export const ARCHETYPES = [
     id: 'data_stewardship',
     label: 'Data Stewardship',
     dash: [2, 3],
+    description:
+      'Sees itself as a custodian of scientific data, software, institutional resources and ' +
+      'public trust. Prioritises responsible data management, security, privacy, compliance ' +
+      'and long-term sustainability; AI tools are adopted when they can be used safely, and ' +
+      'researchers are expected to protect the systems entrusted to them.',
     optimises: 'Security & responsibility',
     question: 'Is this approach secure, compliant and responsible?',
     aiRole: 'Controlled tool',

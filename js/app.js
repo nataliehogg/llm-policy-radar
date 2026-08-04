@@ -40,7 +40,7 @@ function draw() {
   radar.syncAria(state.scores);
   syncReadout(state.scores);
   renderLegend(document.getElementById('legend'), [{ label: 'You', className: 's-you' }]);
-  renderMultiples(document.getElementById('multiples'), state.scores);
+  renderMultiples(document.getElementById('multiples'), state.scores, { tooltip });
 }
 
 /* ---------------------------------------------------------------- session */

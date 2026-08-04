@@ -113,7 +113,7 @@ function draw() {
   renderLegend(document.getElementById('legend'), legendEntries());
 
   const means = state.agg && state.agg.n ? meanScores(state.agg) : null;
-  renderMultiples(document.getElementById('multiples'), means, { className: 's-mean' });
+  renderMultiples(document.getElementById('multiples'), means, { className: 's-mean', tooltip });
   renderDisagreement();
 
   document.getElementById('stat-n').textContent = state.agg ? state.agg.n : 0;
