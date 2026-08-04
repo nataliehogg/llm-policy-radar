@@ -8,3 +8,6 @@ package-lock.json
 
 .DS_Store
 Thumbs.db
+
+# Claude Code local settings and its transient write-temp files.
+.claude/
